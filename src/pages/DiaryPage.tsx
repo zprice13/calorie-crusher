@@ -12,6 +12,7 @@ import {
   type Meal,
 } from '../types'
 import FoodSearchSheet from '../components/FoodSearchSheet'
+import { Menacing } from '../components/Hype'
 
 const MACRO_COLORS = {
   protein: 'var(--series-1)',
@@ -76,6 +77,7 @@ export default function DiaryPage() {
       </div>
 
       <div className="card">
+        <Menacing />
         <div className="summary-grid">
           <div>
             <div
@@ -84,7 +86,9 @@ export default function DiaryPage() {
             >
               {remaining}
             </div>
-            <div className="stat-sub">kcal remaining</div>
+            <div className="stat-sub">
+              {remaining < 0 ? 'kcal OVER. shameful display!' : 'kcal left to crush'}
+            </div>
             <div className="stat-sub" style={{ marginTop: 4 }}>
               {s.kcalGoal} goal − {Math.round(totals.kcal)} food
               {burned > 0 ? ` + ${burned} exercise` : ''}
@@ -125,7 +129,7 @@ export default function DiaryPage() {
             <div className="card" style={{ padding: '2px 14px' }}>
               {list.length === 0 && (
                 <div className="muted" style={{ padding: '10px 0' }}>
-                  Nothing logged yet
+                  No fuel logged. The grind does not pause.
                 </div>
               )}
               {list.map((e) => (
@@ -148,7 +152,7 @@ export default function DiaryPage() {
               ))}
             </div>
             <button className="add-food-btn" onClick={() => setAddTo(meal)}>
-              + Add food
+              + Fuel up
             </button>
           </section>
         )

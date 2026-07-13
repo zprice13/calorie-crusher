@@ -45,12 +45,12 @@ export default function SettingsPage() {
   async function save() {
     if (macroSum !== 100) return
     await saveSettings(form)
-    toast('Goals saved')
+    toast('The pact is sealed. Your destiny is set!')
   }
 
   return (
     <div>
-      <h1>Goals & profile</h1>
+      <h1>Forge your destiny</h1>
 
       <h2>Daily targets</h2>
       <div className="card">
@@ -124,7 +124,7 @@ export default function SettingsPage() {
         />
       </div>
 
-      <h2>Estimate my calorie goal</h2>
+      <h2>Consult the oracle (TDEE)</h2>
       <div className="card">
         <div className="row">
           <div>
@@ -190,7 +190,7 @@ export default function SettingsPage() {
         onClick={save}
         disabled={macroSum !== 100 || !form.kcalGoal}
       >
-        Save goals
+        Seal the pact
       </button>
     </div>
   )

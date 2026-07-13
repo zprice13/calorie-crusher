@@ -10,6 +10,7 @@ import {
 } from '../types'
 import WeightChart from '../components/WeightChart'
 import { useToast } from '../components/Toast'
+import { Mascot } from '../components/Hype'
 
 export default function WeightPage() {
   const toast = useToast()
@@ -37,12 +38,12 @@ export default function WeightPage() {
     if (existing) await db.weights.update(existing.id!, { kg })
     else await db.weights.add({ date, kg, createdAt: Date.now() })
     setValue('')
-    toast(`Weight saved for ${date}`)
+    toast(`Mass declared for ${date}. The scale trembles!`)
   }
 
   return (
     <div>
-      <h1>Weight</h1>
+      <h1>Mass monitor</h1>
 
       <div className="card">
         {latest ? (
@@ -60,7 +61,10 @@ export default function WeightPage() {
             </div>
           </>
         ) : (
-          <div className="muted">Log your first weigh-in to start the trend.</div>
+          <div style={{ textAlign: 'center' }}>
+            <Mascot size={110} />
+            <div className="muted">Step onto the scale, warrior. The trend awaits.</div>
+          </div>
         )}
 
         {weights && weights.length >= 2 && (
@@ -70,7 +74,7 @@ export default function WeightPage() {
         )}
       </div>
 
-      <h2>Log weigh-in</h2>
+      <h2>Declare your mass</h2>
       <div className="card">
         <div className="row">
           <div>

@@ -64,7 +64,7 @@ export default function FoodDetailSheet({
         // Cache the product so it appears in "recent" and works offline.
         await db.foods.put({ ...food, lastUsed: Date.now() })
       })
-      toast(`Logged ${scaled.kcal} kcal to ${meal}`)
+      toast(`ORAAA! ${scaled.kcal} kcal crushed into ${meal}!`)
       onLogged?.()
       onClose()
     } finally {
@@ -132,7 +132,7 @@ export default function FoodDetailSheet({
             Cancel
           </button>
           <button className="primary" onClick={log} disabled={saving || !grams || grams <= 0}>
-            Add to diary
+            Consume!
           </button>
         </div>
       </div>

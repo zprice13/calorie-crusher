@@ -54,14 +54,21 @@ export default function ScanPage({ onLogged }: { onLogged: () => void }) {
 
   return (
     <div>
-      <h1>Scan a barcode</h1>
+      <h1>Target acquisition</h1>
 
-      <div className="scanner-viewport">
+      <div className={`scanner-viewport ${scanner.state === 'scanning' ? 'thermal' : ''}`}>
         <video ref={scanner.videoRef} muted playsInline />
         {scanner.state === 'scanning' && (
           <>
+            <div className="thermal-overlay" />
             <div className="scan-reticle" />
             <div className="scan-line" />
+            <div className="tri-dot" aria-hidden="true">
+              <span />
+              <span />
+              <span />
+            </div>
+            <div className="scanner-hud">Thermal · lock-on armed</div>
           </>
         )}
         {scanner.state !== 'scanning' && (
@@ -82,7 +89,7 @@ export default function ScanPage({ onLogged }: { onLogged: () => void }) {
               <span className="muted">{scanner.error}</span>
             ) : (
               <span className="muted">
-                Point your camera at a UPC/EAN barcode to look up nutrition facts.
+                Aim at a UPC/EAN barcode. If it has a label, we can track it.
               </span>
             )}
             <button
@@ -91,30 +98,31 @@ export default function ScanPage({ onLogged }: { onLogged: () => void }) {
               disabled={scanner.state === 'starting'}
             >
               {scanner.state === 'starting'
-                ? 'Starting camera…'
+                ? 'Powering up…'
                 : scanner.state === 'error'
-                  ? 'Try again'
-                  : 'Start camera'}
+                  ? 'Re-engage'
+                  : 'Engage thermal vision'}
             </button>
           </div>
         )}
       </div>
 
       <div className="scanner-status">
-        {scanner.state === 'scanning' && lookup.phase === 'idle' && 'Looking for a barcode…'}
-        {lookup.phase === 'looking' && `Looking up ${lookup.barcode}…`}
+        {scanner.state === 'scanning' && lookup.phase === 'idle' && 'Hunting for prey (barcodes)…'}
+        {lookup.phase === 'looking' && `Specimen ${lookup.barcode} acquired. Analyzing…`}
         {lookup.phase === 'not-found' && (
           <span>
-            Barcode <strong>{lookup.barcode}</strong> isn’t in Open Food Facts.{' '}
-            <button className="danger-ghost" style={{ color: 'var(--series-1)', padding: 0 }} onClick={reset}>
-              Scan again
+            Specimen <strong>{lookup.barcode}</strong> is unknown to Open Food Facts. It
+            escaped… this time.{' '}
+            <button className="danger-ghost" style={{ color: 'var(--hype-2)', padding: 0 }} onClick={reset}>
+              Hunt again
             </button>
           </span>
         )}
         {lookup.phase === 'lookup-error' && (
           <span>
             Lookup failed — are you online?{' '}
-            <button className="danger-ghost" style={{ color: 'var(--series-1)', padding: 0 }} onClick={() => handleBarcode(lookup.barcode)}>
+            <button className="danger-ghost" style={{ color: 'var(--hype-2)', padding: 0 }} onClick={() => handleBarcode(lookup.barcode)}>
               Retry
             </button>
           </span>
@@ -123,11 +131,11 @@ export default function ScanPage({ onLogged }: { onLogged: () => void }) {
 
       {scanner.state === 'scanning' && (
         <button className="secondary" style={{ width: '100%' }} onClick={scanner.stop}>
-          Stop camera
+          Disengage
         </button>
       )}
 
-      <h2>No camera handy?</h2>
+      <h2>No camera? Type like a warrior</h2>
       <div className="row">
         <input
           placeholder="Enter barcode digits"
@@ -141,15 +149,15 @@ export default function ScanPage({ onLogged }: { onLogged: () => void }) {
           disabled={manualCode.length < 8}
           onClick={() => handleBarcode(manualCode)}
         >
-          Look up
+          Hunt
         </button>
       </div>
       <p className="muted" style={{ marginTop: 10 }}>
-        Nutrition data comes from the community-run{' '}
-        <a href="https://world.openfoodfacts.org" target="_blank" rel="noreferrer" style={{ color: 'var(--series-1)' }}>
+        Nutrition intel comes from the community-run{' '}
+        <a href="https://world.openfoodfacts.org" target="_blank" rel="noreferrer" style={{ color: 'var(--hype-2)' }}>
           Open Food Facts
         </a>{' '}
-        database. Scanned products are cached on-device for offline re-use.
+        database. Captured specimens are cached on-device for offline re-hunting.
       </p>
 
       {lookup.phase === 'found' && (

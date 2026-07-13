@@ -15,8 +15,8 @@ export default defineConfig({
         short_name: 'CalorieCrusher',
         description:
           'Track calories, macros, weight, and exercise. Scan barcodes to log food instantly.',
-        theme_color: '#101418',
-        background_color: '#101418',
+        theme_color: '#140620',
+        background_color: '#140620',
         display: 'standalone',
         orientation: 'portrait',
         // Relative to the manifest URL so the app works at any base path.
