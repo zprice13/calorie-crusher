@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import SplashIntro from './components/SplashIntro'
 import DiaryPage from './pages/DiaryPage'
 import ScanPage from './pages/ScanPage'
 import WeightPage from './pages/WeightPage'
@@ -62,9 +63,11 @@ const TABS: Array<{ id: Tab; label: string; icon: JSX.Element }> = [
 
 export default function App() {
   const [tab, setTab] = useState<Tab>('diary')
+  const [intro, setIntro] = useState(true)
 
   return (
     <ToastProvider>
+      {intro && <SplashIntro onDone={() => setIntro(false)} />}
       <div className="app">
         <main className="page">
           {tab === 'diary' && <DiaryPage />}

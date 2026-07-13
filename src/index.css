@@ -727,3 +727,248 @@ label.field {
     transform: scale(1.06) rotate(2deg);
   }
 }
+
+/* ============================================================
+   SPLASH INTRO — the launch animation
+   Timeline: burst zoom (0s) → mascot slam + flash + shake
+   (~0.35s) → title smash (0.6s) → tagline/glyphs (1s) →
+   fade-out (2.2s). Tap anywhere to skip.
+   ============================================================ */
+.splash {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  background: radial-gradient(circle at 50% 45%, #33104f 0%, var(--page) 70%);
+  cursor: pointer;
+}
+
+.splash-leave {
+  animation: splash-out 0.38s ease-in forwards;
+}
+
+@keyframes splash-out {
+  to {
+    opacity: 0;
+    transform: scale(1.12);
+  }
+}
+
+/* Spinning manga sunburst */
+.splash-burst {
+  position: absolute;
+  inset: -60%;
+  background: repeating-conic-gradient(
+    from 0deg at 50% 50%,
+    transparent 0deg 9deg,
+    rgba(255, 45, 120, 0.14) 9deg 12deg,
+    transparent 12deg 21deg,
+    rgba(255, 179, 0, 0.1) 21deg 24deg
+  );
+  animation: burst-spin 9s linear infinite, burst-zoom 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes burst-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes burst-zoom {
+  from {
+    opacity: 0;
+    transform: scale(2.4);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Impact flash when the mascot lands */
+.splash-flash {
+  position: absolute;
+  inset: 0;
+  background: #fff;
+  opacity: 0;
+  pointer-events: none;
+  animation: impact-flash 0.5s ease-out 0.42s;
+}
+
+@keyframes impact-flash {
+  0% {
+    opacity: 0;
+  }
+  12% {
+    opacity: 0.85;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+/* Everything inside shakes on impact */
+.splash-shake {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  animation: impact-shake 0.5s linear 0.45s;
+}
+
+@keyframes impact-shake {
+  0%, 100% { transform: translate(0, 0); }
+  15% { transform: translate(-7px, 4px) rotate(-1deg); }
+  30% { transform: translate(6px, -5px) rotate(1.2deg); }
+  45% { transform: translate(-5px, -3px); }
+  60% { transform: translate(4px, 4px) rotate(-0.8deg); }
+  75% { transform: translate(-3px, 2px); }
+  90% { transform: translate(2px, -1px); }
+}
+
+/* Mascot slams in from above, oversized */
+.splash-mascot {
+  animation: mascot-slam 0.42s cubic-bezier(0.22, 1.4, 0.36, 1) both;
+}
+
+@keyframes mascot-slam {
+  from {
+    opacity: 0;
+    transform: scale(4) translateY(-24vh) rotate(-14deg);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0) rotate(0deg);
+  }
+}
+
+.splash-title {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  line-height: 0.95;
+  margin-top: 6px;
+}
+
+.splash-title span {
+  font-size: 3rem;
+  font-weight: 900;
+  font-style: italic;
+  text-transform: uppercase;
+  letter-spacing: 0.01em;
+  background: var(--hype-grad);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  filter: drop-shadow(4px 4px 0 rgba(0, 0, 0, 0.9));
+  transform: rotate(-2deg);
+}
+
+.splash-title .from-left {
+  animation: smash-left 0.34s cubic-bezier(0.22, 1.3, 0.36, 1) 0.6s both;
+}
+
+.splash-title .from-right {
+  animation: smash-right 0.34s cubic-bezier(0.22, 1.3, 0.36, 1) 0.72s both;
+}
+
+@keyframes smash-left {
+  from {
+    opacity: 0;
+    transform: translateX(-70vw) skewX(-18deg) rotate(-2deg);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0) skewX(0) rotate(-2deg);
+  }
+}
+
+@keyframes smash-right {
+  from {
+    opacity: 0;
+    transform: translateX(70vw) skewX(18deg) rotate(-2deg);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0) skewX(0) rotate(-2deg);
+  }
+}
+
+.splash-tagline {
+  margin-top: 12px;
+  font-size: 0.8rem;
+  font-weight: 900;
+  font-style: italic;
+  text-transform: uppercase;
+  letter-spacing: 0.32em;
+  color: var(--thermal);
+  text-shadow: 0 0 8px rgba(57, 255, 106, 0.7);
+  animation: tagline-in 0.5s ease-out 1.05s both, hudblink 1.2s steps(2) 1.6s infinite;
+}
+
+@keyframes tagline-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.splash-glyph {
+  position: absolute;
+  font-weight: 900;
+  color: var(--hype-1);
+  text-shadow: 3px 3px 0 rgba(0, 0, 0, 0.85);
+  pointer-events: none;
+  animation: glyph-pop 0.3s cubic-bezier(0.22, 1.5, 0.36, 1) both;
+}
+
+.splash-glyph-1 { top: 12%; left: 10%; font-size: 3rem; animation-delay: 0.95s; transform: rotate(-12deg); }
+.splash-glyph-2 { top: 20%; right: 8%; font-size: 2.2rem; animation-delay: 1.1s; transform: rotate(10deg); }
+.splash-glyph-3 { bottom: 22%; left: 12%; font-size: 2.4rem; animation-delay: 1.25s; transform: rotate(8deg); }
+.splash-glyph-4 { bottom: 14%; right: 12%; font-size: 3.2rem; animation-delay: 1.4s; transform: rotate(-9deg); }
+
+@keyframes glyph-pop {
+  from {
+    opacity: 0;
+    scale: 3;
+  }
+  to {
+    opacity: 0.9;
+    scale: 1;
+  }
+}
+
+.splash-skip {
+  position: absolute;
+  bottom: calc(18px + env(safe-area-inset-bottom));
+  left: 0;
+  right: 0;
+  text-align: center;
+  font-size: 0.68rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  color: var(--text-muted);
+  animation: tagline-in 0.4s ease-out 1.5s both;
+}
+
+/* Reduced motion: plain quick fade, no fireworks */
+.splash-reduced {
+  animation: none;
+}
+
+.splash-reduced.splash-leave {
+  animation: splash-out-plain 0.3s ease-in forwards;
+}
+
+@keyframes splash-out-plain {
+  to {
+    opacity: 0;
+  }
+}
