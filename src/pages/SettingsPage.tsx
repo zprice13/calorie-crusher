@@ -5,11 +5,59 @@ import {
   DEFAULT_SETTINGS,
   displayToKg,
   estimateTdee,
+  ftInToHeightCm,
+  heightCmToFtIn,
   kgToDisplay,
   weightUnitLabel,
   type Settings,
 } from '../types'
 import { useToast } from '../components/Toast'
+
+function HeightFtIn({
+  heightCm,
+  onChange,
+}: {
+  heightCm?: number
+  onChange: (cm: number | undefined) => void
+}) {
+  const current = heightCm != null ? heightCmToFtIn(heightCm) : null
+
+  function update(ftStr: string, inStr: string) {
+    const ft = parseInt(ftStr, 10)
+    const inches = parseInt(inStr, 10)
+    if (!ft && !inches) {
+      onChange(undefined)
+      return
+    }
+    onChange(ftInToHeightCm(ft || 0, inches || 0))
+  }
+
+  return (
+    <>
+      <div>
+        <label className="field">Height (ft)</label>
+        <input
+          type="number"
+          inputMode="numeric"
+          min={0}
+          value={current?.ft ?? ''}
+          onChange={(e) => update(e.target.value, String(current?.inches ?? ''))}
+        />
+      </div>
+      <div>
+        <label className="field">(in)</label>
+        <input
+          type="number"
+          inputMode="numeric"
+          min={0}
+          max={11}
+          value={current?.inches ?? ''}
+          onChange={(e) => update(String(current?.ft ?? ''), e.target.value)}
+        />
+      </div>
+    </>
+  )
+}
 
 export default function SettingsPage() {
   const toast = useToast()
@@ -101,8 +149,8 @@ export default function SettingsPage() {
           value={form.unit}
           onChange={(e) => patch({ unit: e.target.value as Settings['unit'] })}
         >
-          <option value="metric">Metric (kg, cm)</option>
-          <option value="imperial">Imperial (lb)</option>
+          <option value="imperial">Imperial (lb, ft/in, oz)</option>
+          <option value="metric">Metric (kg, cm, g)</option>
         </select>
 
         <label className="field" htmlFor="weight-goal">
@@ -147,15 +195,19 @@ export default function SettingsPage() {
               onChange={(e) => patch({ age: parseInt(e.target.value, 10) || undefined })}
             />
           </div>
-          <div>
-            <label className="field">Height (cm)</label>
-            <input
-              type="number"
-              inputMode="numeric"
-              value={form.heightCm ?? ''}
-              onChange={(e) => patch({ heightCm: parseInt(e.target.value, 10) || undefined })}
-            />
-          </div>
+          {form.unit === 'imperial' ? (
+            <HeightFtIn heightCm={form.heightCm} onChange={(cm) => patch({ heightCm: cm })} />
+          ) : (
+            <div>
+              <label className="field">Height (cm)</label>
+              <input
+                type="number"
+                inputMode="numeric"
+                value={form.heightCm ?? ''}
+                onChange={(e) => patch({ heightCm: parseInt(e.target.value, 10) || undefined })}
+              />
+            </div>
+          )}
         </div>
         <label className="field">Activity level</label>
         <select

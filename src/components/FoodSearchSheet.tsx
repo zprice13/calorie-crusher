@@ -2,7 +2,14 @@ import { useEffect, useRef, useState } from 'react'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { db } from '../db'
 import { searchProducts } from '../api/openFoodFacts'
-import type { Food, Meal } from '../types'
+import {
+  DEFAULT_SETTINGS,
+  foodAmountToGrams,
+  GRAMS_PER_OZ,
+  type Food,
+  type Meal,
+  type Settings,
+} from '../types'
 import FoodDetailSheet from './FoodDetailSheet'
 
 interface Props {
@@ -25,6 +32,17 @@ export default function FoodSearchSheet({ date, meal, onClose }: Props) {
     () => db.foods.orderBy('lastUsed').reverse().limit(8).toArray(),
     [],
   )
+  const settings = useLiveQuery(() => db.settings.get('settings'), [])
+  const unit = (settings ?? DEFAULT_SETTINGS).unit
+
+  // Escape closes this sheet, unless a child sheet is open (it handles its own).
+  const hasChild = selected !== null || showCustom
+  useEffect(() => {
+    if (hasChild) return
+    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && onClose()
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [hasChild, onClose])
 
   useEffect(() => {
     abortRef.current?.abort()
@@ -104,7 +122,9 @@ export default function FoodSearchSheet({ date, meal, onClose }: Props) {
                   </div>
                   <div className="detail muted" style={{ fontSize: '0.75rem' }}>
                     {f.brand ? `${f.brand} · ` : ''}
-                    {f.per100.kcal} kcal / 100 g
+                    {unit === 'imperial'
+                      ? `${Math.round((f.per100.kcal * GRAMS_PER_OZ) / 100)} kcal / oz`
+                      : `${f.per100.kcal} kcal / 100 g`}
                   </div>
                 </div>
               </button>
@@ -132,6 +152,7 @@ export default function FoodSearchSheet({ date, meal, onClose }: Props) {
       )}
       {showCustom && (
         <CustomFoodSheet
+          unit={unit}
           onCreated={(f) => {
             setShowCustom(false)
             setSelected(f)
@@ -144,9 +165,11 @@ export default function FoodSearchSheet({ date, meal, onClose }: Props) {
 }
 
 function CustomFoodSheet({
+  unit,
   onCreated,
   onClose,
 }: {
+  unit: Settings['unit']
   onCreated: (f: Food) => void
   onClose: () => void
 }) {
@@ -156,15 +179,25 @@ function CustomFoodSheet({
   const [carbs, setCarbs] = useState('')
   const [fat, setFat] = useState('')
 
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && onClose()
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [onClose])
+
   function create() {
+    // Values are entered per reference amount (1 oz imperial / 100 g metric)
+    // but stored normalized to per-100 g.
+    const refGrams = foodAmountToGrams(unit === 'imperial' ? 1 : 100, unit)
+    const norm = (v: string) => ((parseFloat(v) || 0) * 100) / refGrams
     const food: Food = {
       id: `custom-${crypto.randomUUID()}`,
       name: name.trim(),
       per100: {
-        kcal: parseFloat(kcal) || 0,
-        protein: parseFloat(protein) || 0,
-        carbs: parseFloat(carbs) || 0,
-        fat: parseFloat(fat) || 0,
+        kcal: norm(kcal),
+        protein: norm(protein),
+        carbs: norm(carbs),
+        fat: norm(fat),
       },
       source: 'custom',
       lastUsed: Date.now(),
@@ -172,11 +205,13 @@ function CustomFoodSheet({
     onCreated(food)
   }
 
+  const refLabel = unit === 'imperial' ? 'per oz' : 'per 100 g'
+
   return (
     <div className="sheet-backdrop" onClick={onClose}>
       <div className="sheet" onClick={(e) => e.stopPropagation()}>
-        <h3>Custom food</h3>
-        <div className="muted">Enter nutrition per 100 g.</div>
+        <h3>Forge custom food</h3>
+        <div className="muted">Enter nutrition {refLabel}.</div>
         <label className="field">Name</label>
         <input value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. Homemade granola" />
         <div className="row">

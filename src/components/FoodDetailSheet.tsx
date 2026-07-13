@@ -1,6 +1,18 @@
 import { useEffect, useMemo, useState } from 'react'
+import { useLiveQuery } from 'dexie-react-hooks'
 import { db } from '../db'
-import { MEALS, todayStr, type Food, type Meal } from '../types'
+import {
+  DEFAULT_SETTINGS,
+  foodAmountLabel,
+  foodAmountToGrams,
+  formatFoodAmount,
+  gramsToFoodAmount,
+  GRAMS_PER_OZ,
+  MEALS,
+  todayStr,
+  type Food,
+  type Meal,
+} from '../types'
 import { useToast } from './Toast'
 
 function defaultMeal(): Meal {
@@ -9,6 +21,10 @@ function defaultMeal(): Meal {
   if (h < 14) return 'lunch'
   if (h < 20) return 'dinner'
   return 'snacks'
+}
+
+function roundAmount(v: number): number {
+  return v >= 10 ? Math.round(v) : +v.toFixed(1)
 }
 
 interface Props {
@@ -27,9 +43,22 @@ export default function FoodDetailSheet({
   onLogged,
 }: Props) {
   const toast = useToast()
+  const settings = useLiveQuery(() => db.settings.get('settings'), [])
+  const unit = (settings ?? DEFAULT_SETTINGS).unit
+  const amountLabel = foodAmountLabel(unit)
+
   const [meal, setMeal] = useState<Meal>(initialMeal ?? defaultMeal())
-  const [grams, setGrams] = useState<number>(food.servingGrams ?? 100)
+  // null = "default serving" until the user types; keeps the field stable
+  // while the unit setting loads from IndexedDB.
+  const [amountStr, setAmountStr] = useState<string | null>(null)
   const [saving, setSaving] = useState(false)
+
+  const defaultGrams = food.servingGrams ?? 100
+  const amount =
+    amountStr !== null
+      ? parseFloat(amountStr)
+      : roundAmount(gramsToFoodAmount(defaultGrams, unit))
+  const grams = foodAmountToGrams(amount, unit)
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => e.key === 'Escape' && onClose()
@@ -46,6 +75,18 @@ export default function FoodDetailSheet({
       fat: +(food.per100.fat * f).toFixed(1),
     }
   }, [food, grams])
+
+  // Reference nutrition line: per oz for imperial, per 100 g for metric.
+  const ref = useMemo(() => {
+    const f = unit === 'imperial' ? GRAMS_PER_OZ / 100 : 1
+    return {
+      label: unit === 'imperial' ? 'Per oz' : 'Per 100 g',
+      kcal: Math.round(food.per100.kcal * f),
+      protein: +(food.per100.protein * f).toFixed(1),
+      carbs: +(food.per100.carbs * f).toFixed(1),
+      fat: +(food.per100.fat * f).toFixed(1),
+    }
+  }, [food, unit])
 
   async function log() {
     if (!grams || grams <= 0) return
@@ -78,22 +119,22 @@ export default function FoodDetailSheet({
         <h3>{food.name}</h3>
         {food.brand && <div className="muted">{food.brand}</div>}
         <div className="muted" style={{ marginTop: 6 }}>
-          Per 100 g: {food.per100.kcal} kcal · P {food.per100.protein} g · C{' '}
-          {food.per100.carbs} g · F {food.per100.fat} g
+          {ref.label}: {ref.kcal} kcal · P {ref.protein} g · C {ref.carbs} g · F {ref.fat} g
         </div>
 
         <div className="row" style={{ marginTop: 14 }}>
           <div>
-            <label className="field" htmlFor="grams">
-              Amount (g)
+            <label className="field" htmlFor="amount">
+              Amount ({amountLabel})
             </label>
             <input
-              id="grams"
+              id="amount"
               type="number"
               inputMode="decimal"
-              min={1}
-              value={Number.isNaN(grams) ? '' : grams}
-              onChange={(e) => setGrams(parseFloat(e.target.value))}
+              min={0.1}
+              step={unit === 'imperial' ? 0.1 : 1}
+              value={amountStr ?? amount}
+              onChange={(e) => setAmountStr(e.target.value)}
             />
           </div>
           <div>
@@ -114,9 +155,16 @@ export default function FoodDetailSheet({
           <button
             className="secondary"
             style={{ marginTop: 10, width: '100%' }}
-            onClick={() => setGrams(food.servingGrams!)}
+            onClick={() =>
+              setAmountStr(String(roundAmount(gramsToFoodAmount(food.servingGrams!, unit))))
+            }
           >
-            Use serving size{food.servingLabel ? ` (${food.servingLabel})` : ''}
+            Use serving size (
+            {food.servingLabel ?? formatFoodAmount(food.servingGrams, unit)}
+            {food.servingLabel && unit === 'imperial'
+              ? ` ≈ ${formatFoodAmount(food.servingGrams, unit)}`
+              : ''}
+            )
           </button>
         )}
 
