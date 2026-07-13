@@ -1,6 +1,7 @@
 /**
- * Theme flair: an original hyper-muscular mascot (double-biceps flex,
- * pompadour, shades) and floating "menacing" katakana glyphs.
+ * Theme flair: an original mascot — a stark bodybuilder silhouette
+ * (front double-biceps) breaking out of a gradient triangle frame —
+ * and floating "menacing" katakana glyphs.
  */
 
 export function Mascot({ size = 120, flexing = true }: { size?: number; flexing?: boolean }) {
@@ -11,56 +12,51 @@ export function Mascot({ size = 120, flexing = true }: { size?: number; flexing?
       height={size}
       viewBox="0 0 120 120"
       role="img"
-      aria-label="Extremely muscular mascot flexing"
+      aria-label="Bodybuilder silhouette flexing inside a triangle"
     >
-      {/* burst background */}
-      <g fill="#ffb300" opacity="0.25">
-        {Array.from({ length: 12 }, (_, i) => {
-          const a = (i / 12) * Math.PI * 2
-          const x1 = 60 + Math.cos(a) * 26
-          const y1 = 60 + Math.sin(a) * 26
-          const x2 = 60 + Math.cos(a + 0.09) * 58
-          const y2 = 60 + Math.sin(a + 0.09) * 58
-          const x3 = 60 + Math.cos(a - 0.09) * 58
-          const y3 = 60 + Math.sin(a - 0.09) * 58
-          return <polygon key={i} points={`${x1},${y1} ${x2},${y2} ${x3},${y3}`} />
-        })}
-      </g>
-      {/* torso: absurd V-taper */}
-      <path d="M38 74 L44 52 L60 46 L76 52 L82 74 L70 78 L60 74 L50 78 Z" fill="#e8935a" />
-      {/* pecs */}
-      <path d="M48 56 Q60 64 72 56 Q72 66 60 68 Q48 66 48 56Z" fill="#d97f45" />
-      {/* flexed arms: shoulders → towering biceps balls */}
-      <circle cx="38" cy="56" r="11" fill="#e8935a" />
-      <circle cx="82" cy="56" r="11" fill="#e8935a" />
-      <circle cx="32" cy="42" r="10" fill="#e8935a" />
-      <circle cx="88" cy="42" r="10" fill="#e8935a" />
-      {/* bicep peak highlights */}
-      <circle cx="30" cy="38" r="4" fill="#f7b27e" />
-      <circle cx="90" cy="38" r="4" fill="#f7b27e" />
-      {/* fists */}
-      <circle cx="36" cy="32" r="5.5" fill="#d97f45" />
-      <circle cx="84" cy="32" r="5.5" fill="#d97f45" />
-      {/* tiny head, mighty pompadour */}
-      <circle cx="60" cy="36" r="9" fill="#e8935a" />
-      <path d="M50 32 Q52 18 66 20 Q74 22 70 30 Q66 26 60 27 Q53 28 50 32Z" fill="#1c1024" />
-      {/* shades */}
-      <rect x="53" y="33" width="6.5" height="4" rx="1" fill="#1c1024" />
-      <rect x="61" y="33" width="6.5" height="4" rx="1" fill="#1c1024" />
-      <rect x="59" y="34" width="3" height="1.6" fill="#1c1024" />
-      {/* smirk */}
-      <path d="M56 42 Q60 45 64 42" stroke="#1c1024" strokeWidth="1.6" fill="none" strokeLinecap="round" />
-      {/* abs — all eight of them */}
-      <g stroke="#c06a33" strokeWidth="1.4" strokeLinecap="round">
-        <line x1="60" y1="50" x2="60" y2="72" />
-        <line x1="53" y1="56" x2="67" y2="56" />
-        <line x1="53" y1="62" x2="67" y2="62" />
-        <line x1="54" y1="68" x2="66" y2="68" />
-      </g>
-      {/* sparkles */}
-      <g fill="#fff">
-        <path d="M22 24 l1.6 3.6 3.6 1.6 -3.6 1.6 -1.6 3.6 -1.6 -3.6 -3.6 -1.6 3.6 -1.6Z" />
-        <path d="M98 66 l1.2 2.8 2.8 1.2 -2.8 1.2 -1.2 2.8 -1.2 -2.8 -2.8 -1.2 2.8 -1.2Z" />
+      <defs>
+        <linearGradient id="mascot-tri" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stopColor="#ff2d78" />
+          <stop offset="1" stopColor="#ffb300" />
+        </linearGradient>
+      </defs>
+      {/* triangle frame */}
+      <path
+        d="M60 6 L112 106 L8 106 Z"
+        fill="none"
+        stroke="url(#mascot-tri)"
+        strokeWidth="4.5"
+        strokeLinejoin="round"
+      />
+      {/* silhouette: overlapping shapes, one fill; limbs are round-capped strokes */}
+      <g fill="#f2eaff">
+        <circle cx="60" cy="21.5" r="6.2" />
+        {/* traps sloping into the delts */}
+        <path d="M46 45 C48.5 35 54 31.5 60 31.5 C66 31.5 71.5 35 74 45 Z" />
+        {/* chest slab (fills the sternum between the pecs) */}
+        <path d="M44 42 L76 42 L72 60 L48 60 Z" />
+        <circle cx="42" cy="44" r="8.5" />
+        <circle cx="78" cy="44" r="8.5" />
+        {/* left arm: upper arm, bicep peak, forearm curling in, fist */}
+        <line x1="42" y1="44" x2="26" y2="40" stroke="#f2eaff" strokeWidth="10" strokeLinecap="round" />
+        <circle cx="32" cy="39" r="7.5" />
+        <line x1="26" y1="40" x2="34" y2="22" stroke="#f2eaff" strokeWidth="8" strokeLinecap="round" />
+        <circle cx="35.5" cy="20" r="5" />
+        {/* right arm */}
+        <line x1="78" y1="44" x2="94" y2="40" stroke="#f2eaff" strokeWidth="10" strokeLinecap="round" />
+        <circle cx="88" cy="39" r="7.5" />
+        <line x1="94" y1="40" x2="86" y2="22" stroke="#f2eaff" strokeWidth="8" strokeLinecap="round" />
+        <circle cx="84.5" cy="20" r="5" />
+        {/* torso: lats flare then hard V-taper to the waist */}
+        <path d="M35 42 C41 46 50 47.5 60 47.5 C70 47.5 79 46 85 42 C84 58 73 68 69 82 L51 82 C47 68 36 58 35 42 Z" />
+        <ellipse cx="52.5" cy="51" rx="9" ry="6.5" />
+        <ellipse cx="67.5" cy="51" rx="9" ry="6.5" />
+        {/* hips + legs planted on the triangle base */}
+        <path d="M52 79 L68 79 L70 88 L50 88 Z" />
+        <line x1="55" y1="85" x2="52.5" y2="97" stroke="#f2eaff" strokeWidth="10" strokeLinecap="round" />
+        <line x1="52.5" y1="97" x2="52" y2="107" stroke="#f2eaff" strokeWidth="7" strokeLinecap="round" />
+        <line x1="65" y1="85" x2="67.5" y2="97" stroke="#f2eaff" strokeWidth="10" strokeLinecap="round" />
+        <line x1="67.5" y1="97" x2="68" y2="107" stroke="#f2eaff" strokeWidth="7" strokeLinecap="round" />
       </g>
     </svg>
   )
