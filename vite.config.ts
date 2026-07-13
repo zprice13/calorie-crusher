@@ -39,7 +39,7 @@ export default defineConfig({
         // resolve offline; network-first keeps data fresh when online.
         runtimeCaching: [
           {
-            urlPattern: /^https:\/\/world\.openfoodfacts\.org\/api\/.*/i,
+            urlPattern: /^https:\/\/(world|us)\.openfoodfacts\.org\/.*/i,
             handler: 'NetworkFirst',
             options: {
               cacheName: 'off-products',
