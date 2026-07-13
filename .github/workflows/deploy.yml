@@ -4,8 +4,6 @@ on:
   push:
     branches:
       - main
-      # Deploy the feature branch too until it's merged.
-      - claude/nutrition-pwa-barcode-scan-y0ge6f
   workflow_dispatch:
 
 permissions:

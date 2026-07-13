@@ -48,7 +48,10 @@ body {
 
 .page {
   flex: 1;
-  padding: 16px 16px calc(var(--nav-height) + 24px + env(safe-area-inset-bottom));
+  /* Top inset keeps content clear of the iOS status bar (notch/clock/battery)
+     when installed to the home screen with a translucent status bar. */
+  padding: calc(16px + env(safe-area-inset-top, 0px)) 16px
+    calc(var(--nav-height) + 24px + env(safe-area-inset-bottom, 0px));
 }
 
 h1 {
