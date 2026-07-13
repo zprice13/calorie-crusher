@@ -54,7 +54,7 @@ export default function ExercisePage() {
       minutes: mins,
       met: act.met,
     })
-    toast(`Added to ${WEEKDAYS[weekday]} plan`)
+    toast(`${WEEKDAYS[weekday]}'s destiny is written!`)
   }
 
   async function logNow(name: string, mins: number, met: number) {
@@ -67,7 +67,7 @@ export default function ExercisePage() {
       kcalBurned: kcal,
       createdAt: Date.now(),
     })
-    toast(`Logged ${name}: ~${kcal} kcal burned`)
+    toast(`${name} conquered: ~${kcal} kcal obliterated!`)
   }
 
   async function completePlanned(p: PlannedExercise) {
@@ -76,12 +76,12 @@ export default function ExercisePage() {
 
   return (
     <div>
-      <h1>Exercise</h1>
+      <h1>Training arc</h1>
 
       <div className="card">
         <div className="stat-value">{burnedToday}</div>
         <div className="stat-sub">
-          kcal burned today — added back to today’s calorie budget
+          kcal obliterated today — returned to your power budget
         </div>
       </div>
 
@@ -117,7 +117,7 @@ export default function ExercisePage() {
       <div className="card" style={{ padding: '2px 14px' }}>
         {(plan ?? []).length === 0 && (
           <div className="muted" style={{ padding: '10px 0' }}>
-            Rest day — nothing planned for {WEEKDAYS[weekday]}
+            Rest day on {WEEKDAYS[weekday]}?! …Fine. Even legends must recover.
           </div>
         )}
         {(plan ?? []).map((p) => (
@@ -177,7 +177,7 @@ export default function ExercisePage() {
               logNow(act.name, parseInt(minutes, 10), act.met)
             }}
           >
-            Log now
+            It is done
           </button>
         </div>
         <p className="muted" style={{ marginBottom: 0 }}>

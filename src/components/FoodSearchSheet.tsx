@@ -116,7 +116,7 @@ export default function FoodSearchSheet({ date, meal, onClose }: Props) {
             style={{ marginTop: 12 }}
             onClick={() => setShowCustom(true)}
           >
-            + Create custom food
+            + Forge a custom food
           </button>
         </div>
       </div>

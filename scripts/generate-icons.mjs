@@ -9,9 +9,9 @@ import { fileURLToPath } from 'node:url'
 const outDir = join(dirname(fileURLToPath(import.meta.url)), '..', 'public', 'icons')
 mkdirSync(outDir, { recursive: true })
 
-const BLUE = [0x39, 0x87, 0xe5, 255]
+const BLUE = [0xff, 0x2d, 0x78, 255] // theme magenta (name kept for the draw code)
 const WHITE = [255, 255, 255, 255]
-const RED = [0xd0, 0x3b, 0x3b, 255]
+const RED = [0xff, 0xb3, 0x00, 255] // gold scan line
 const CLEAR = [0, 0, 0, 0]
 
 function crc32(buf) {
