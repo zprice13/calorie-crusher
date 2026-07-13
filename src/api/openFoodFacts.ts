@@ -91,15 +91,20 @@ export async function lookupBarcode(barcode: string): Promise<Food> {
 
 /** Free-text product search (for foods without a barcode handy). */
 export async function searchProducts(query: string, signal?: AbortSignal): Promise<Food[]> {
-  // Free-text search is only available on the legacy CGI endpoint.
+  // Free-text search is only available on the legacy CGI endpoint. The US
+  // subdomain limits results to products sold in the US (the world index is
+  // dominated by European entries), and sorting by scan count floats the
+  // products people actually buy to the top.
   const url =
-    'https://world.openfoodfacts.org/cgi/search.pl?' +
+    'https://us.openfoodfacts.org/cgi/search.pl?' +
     new URLSearchParams({
       search_terms: query,
       search_simple: '1',
       action: 'process',
       json: '1',
       page_size: '20',
+      sort_by: 'unique_scans_n',
+      lc: 'en',
       fields: PRODUCT_FIELDS,
     })
   const res = await fetch(url, { signal })
