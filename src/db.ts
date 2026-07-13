@@ -27,6 +27,16 @@ class CrusherDB extends Dexie {
       plannedExercises: '++id, weekday',
       settings: 'id',
     })
+    // v2: imperial became the app default; migrate previously saved settings
+    // once. Users can still switch back to metric in Goals.
+    this.version(2).upgrade((tx) =>
+      tx
+        .table('settings')
+        .toCollection()
+        .modify((s: Settings) => {
+          s.unit = 'imperial'
+        }),
+    )
   }
 }
 

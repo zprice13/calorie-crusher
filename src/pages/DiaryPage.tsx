@@ -4,6 +4,7 @@ import { db } from '../db'
 import {
   addDays,
   formatDateLabel,
+  formatFoodAmount,
   KCAL_PER_GRAM,
   MEALS,
   todayStr,
@@ -137,8 +138,8 @@ export default function DiaryPage() {
                   <div className="info">
                     <div className="name">{e.name}</div>
                     <div className="detail">
-                      {e.grams} g · P {Math.round(e.protein)} · C {Math.round(e.carbs)} · F{' '}
-                      {Math.round(e.fat)}
+                      {formatFoodAmount(e.grams, s.unit)} · P {Math.round(e.protein)} · C{' '}
+                      {Math.round(e.carbs)} · F {Math.round(e.fat)}
                     </div>
                   </div>
                   <span className="kcal">{Math.round(e.kcal)}</span>

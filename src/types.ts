@@ -94,7 +94,7 @@ export const DEFAULT_SETTINGS: Settings = {
   proteinPct: 30,
   carbsPct: 40,
   fatPct: 30,
-  unit: 'metric',
+  unit: 'imperial',
   activityFactor: 1.375,
 }
 
@@ -127,6 +127,40 @@ export function formatDateLabel(date: string): string {
 }
 
 export const KG_PER_LB = 0.45359237
+export const GRAMS_PER_OZ = 28.349523125
+export const CM_PER_IN = 2.54
+
+/** Food amounts are stored in grams; imperial users see/enter ounces. */
+export function foodAmountToGrams(value: number, unit: Settings['unit']): number {
+  return unit === 'imperial' ? value * GRAMS_PER_OZ : value
+}
+
+export function gramsToFoodAmount(grams: number, unit: Settings['unit']): number {
+  return unit === 'imperial' ? grams / GRAMS_PER_OZ : grams
+}
+
+export function foodAmountLabel(unit: Settings['unit']): string {
+  return unit === 'imperial' ? 'oz' : 'g'
+}
+
+/** e.g. 15 g → "0.5 oz" (imperial) or "15 g" (metric). */
+export function formatFoodAmount(grams: number, unit: Settings['unit']): string {
+  if (unit === 'imperial') {
+    const oz = grams / GRAMS_PER_OZ
+    return `${oz >= 10 ? Math.round(oz) : +oz.toFixed(1)} oz`
+  }
+  return `${grams >= 10 ? Math.round(grams) : +grams.toFixed(1)} g`
+}
+
+export function heightCmToFtIn(cm: number): { ft: number; inches: number } {
+  const totalIn = cm / CM_PER_IN
+  const ft = Math.floor(totalIn / 12)
+  return { ft, inches: Math.round(totalIn - ft * 12) }
+}
+
+export function ftInToHeightCm(ft: number, inches: number): number {
+  return (ft * 12 + inches) * CM_PER_IN
+}
 
 export function kgToDisplay(kg: number, unit: Settings['unit']): number {
   return unit === 'imperial' ? kg / KG_PER_LB : kg

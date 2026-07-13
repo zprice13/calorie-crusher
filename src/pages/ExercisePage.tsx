@@ -1,7 +1,14 @@
 import { useState } from 'react'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { db, latestWeightKg } from '../db'
-import { metBurn, todayStr, type PlannedExercise } from '../types'
+import {
+  DEFAULT_SETTINGS,
+  kgToDisplay,
+  metBurn,
+  todayStr,
+  weightUnitLabel,
+  type PlannedExercise,
+} from '../types'
 import { useToast } from '../components/Toast'
 
 /** Common activities with MET values (Compendium of Physical Activities). */
@@ -38,6 +45,8 @@ export default function ExercisePage() {
     () => db.exerciseLogs.where('date').equals(today).toArray(),
     [today],
   )
+  const settings = useLiveQuery(() => db.settings.get('settings'), [])
+  const unit = (settings ?? DEFAULT_SETTINGS).unit
   const burnedToday = (todaysLog ?? []).reduce((s, e) => s + e.kcalBurned, 0)
 
   async function weightForBurn(): Promise<number> {
@@ -181,8 +190,9 @@ export default function ExercisePage() {
           </button>
         </div>
         <p className="muted" style={{ marginBottom: 0 }}>
-          Burn estimates use MET values and your latest logged weight
-          {` (default ${FALLBACK_WEIGHT_KG} kg if none logged)`}.
+          Burn estimates use MET values and your latest logged weight (default{' '}
+          {Math.round(kgToDisplay(FALLBACK_WEIGHT_KG, unit))} {weightUnitLabel(unit)} if
+          none logged).
         </p>
       </div>
     </div>
