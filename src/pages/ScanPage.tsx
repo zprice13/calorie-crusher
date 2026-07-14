@@ -152,7 +152,7 @@ export default function ScanPage({ onLogged }: { onLogged: () => void }) {
           Hunt
         </button>
       </div>
-      <p className="muted" style={{ marginTop: 10 }}>
+      <p className="muted" style={{ marginTop: 10, marginBottom: 0 }}>
         Nutrition intel comes from the community-run{' '}
         <a href="https://world.openfoodfacts.org" target="_blank" rel="noreferrer" style={{ color: 'var(--hype-2)' }}>
           Open Food Facts
