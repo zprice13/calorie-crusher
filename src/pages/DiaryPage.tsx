@@ -13,6 +13,7 @@ import {
   type Meal,
 } from '../types'
 import FoodSearchSheet from '../components/FoodSearchSheet'
+import WaterCard from '../components/WaterCard'
 import { Menacing } from '../components/Hype'
 
 const MACRO_COLORS = {
@@ -117,6 +118,8 @@ export default function DiaryPage() {
           </div>
         </div>
       </div>
+
+      <WaterCard date={date} unit={s.unit} goalMl={s.waterGoalMl} />
 
       {MEALS.map((meal) => {
         const list = byMeal.get(meal) ?? []

@@ -5,6 +5,7 @@ import type {
   Food,
   PlannedExercise,
   Settings,
+  WaterLog,
   WeightEntry,
 } from './types'
 import { DEFAULT_SETTINGS } from './types'
@@ -15,6 +16,7 @@ class CrusherDB extends Dexie {
   weights!: EntityTable<WeightEntry, 'id'>
   exerciseLogs!: EntityTable<ExerciseLog, 'id'>
   plannedExercises!: EntityTable<PlannedExercise, 'id'>
+  waterLogs!: EntityTable<WaterLog, 'id'>
   settings!: EntityTable<Settings, 'id'>
 
   constructor() {
@@ -37,6 +39,10 @@ class CrusherDB extends Dexie {
           s.unit = 'imperial'
         }),
     )
+    // v3: hydration tracking.
+    this.version(3).stores({
+      waterLogs: '++id, date',
+    })
   }
 }
 
