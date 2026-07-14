@@ -9,6 +9,7 @@ import {
   weightUnitLabel,
 } from '../types'
 import WeightChart from '../components/WeightChart'
+import ProgressPhotos from '../components/ProgressPhotos'
 import { useToast } from '../components/Toast'
 import { Mascot } from '../components/Hype'
 
@@ -101,6 +102,8 @@ export default function WeightPage() {
           Save
         </button>
       </div>
+
+      <ProgressPhotos unit={s.unit} />
 
       {weights && weights.length > 0 && (
         <>

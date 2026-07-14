@@ -60,6 +60,14 @@ export interface WaterLog {
   createdAt: number
 }
 
+/** A progress photo, stored on-device as a downscaled JPEG blob. */
+export interface ProgressPhoto {
+  id?: number
+  date: string
+  blob: Blob
+  createdAt: number
+}
+
 /** A completed workout that credits burned calories to a day. */
 export interface ExerciseLog {
   id?: number

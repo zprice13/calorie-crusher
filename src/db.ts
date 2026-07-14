@@ -4,6 +4,7 @@ import type {
   ExerciseLog,
   Food,
   PlannedExercise,
+  ProgressPhoto,
   Settings,
   WaterLog,
   WeightEntry,
@@ -17,6 +18,7 @@ class CrusherDB extends Dexie {
   exerciseLogs!: EntityTable<ExerciseLog, 'id'>
   plannedExercises!: EntityTable<PlannedExercise, 'id'>
   waterLogs!: EntityTable<WaterLog, 'id'>
+  photos!: EntityTable<ProgressPhoto, 'id'>
   settings!: EntityTable<Settings, 'id'>
 
   constructor() {
@@ -42,6 +44,10 @@ class CrusherDB extends Dexie {
     // v3: hydration tracking.
     this.version(3).stores({
       waterLogs: '++id, date',
+    })
+    // v4: progress photos.
+    this.version(4).stores({
+      photos: '++id, date',
     })
   }
 }
