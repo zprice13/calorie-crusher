@@ -70,8 +70,11 @@ body {
 
 .page {
   flex: 1;
+  /* Bottom padding gives every page the same 32px gap above the nav —
+     pages must end with a flush element (card/button, no trailing margin)
+     to keep it even. */
   padding: calc(16px + env(safe-area-inset-top, 0px)) 16px
-    calc(var(--nav-height) + 24px + env(safe-area-inset-bottom, 0px));
+    calc(var(--nav-height) + 32px + env(safe-area-inset-bottom, 0px));
 }
 
 /* ---------- MANGA TYPOGRAPHY ---------- */
@@ -518,6 +521,9 @@ label.field {
   overflow: hidden;
   background: #000;
   aspect-ratio: 3 / 4;
+  /* Cap so the whole scan page (title, viewport, manual entry, credit)
+     fits a phone viewport instead of running under the bottom nav. */
+  max-height: 44vh;
   border: 2px solid var(--thermal);
   box-shadow: 0 0 18px rgba(57, 255, 106, 0.35), 5px 5px 0 rgba(0, 0, 0, 0.55);
 }

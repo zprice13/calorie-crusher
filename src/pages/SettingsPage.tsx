@@ -1,6 +1,7 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { db, latestWeightKg, saveSettings } from '../db'
+import { downloadBlob, exportBackup, importBackup } from '../lib/backup'
 import {
   DEFAULT_SETTINGS,
   DEFAULT_WATER_GOAL_ML,
@@ -58,6 +59,76 @@ function HeightFtIn({
           value={current?.inches ?? ''}
           onChange={(e) => update(String(current?.ft ?? ''), e.target.value)}
         />
+      </div>
+    </>
+  )
+}
+
+function DataVault() {
+  const toast = useToast()
+  const fileRef = useRef<HTMLInputElement>(null)
+  const [busy, setBusy] = useState(false)
+
+  async function onExport() {
+    setBusy(true)
+    try {
+      const { blob, filename } = await exportBackup()
+      downloadBlob(blob, filename)
+      toast('Backup forged. Guard it well!')
+    } catch {
+      toast('Export failed — try again.')
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  async function onImport(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    e.target.value = ''
+    if (!file) return
+    if (
+      !window.confirm(
+        'Restoring replaces ALL current data (diary, weights, water, exercise, photos, goals) with the backup. Continue?',
+      )
+    )
+      return
+    setBusy(true)
+    try {
+      const counts = await importBackup(file)
+      toast(
+        `Restored: ${counts.diary} foods, ${counts.weights} weigh-ins, ${counts.photos} photos!`,
+      )
+    } catch (err) {
+      toast(err instanceof Error ? err.message : 'Restore failed — is this a backup file?')
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  return (
+    <>
+      <h2>Data vault</h2>
+      <div className="card">
+        <div className="row">
+          <button className="secondary" onClick={onExport} disabled={busy}>
+            {busy ? 'Working…' : 'Export backup'}
+          </button>
+          <button className="secondary" onClick={() => fileRef.current?.click()} disabled={busy}>
+            Restore backup
+          </button>
+        </div>
+        <input
+          ref={fileRef}
+          type="file"
+          accept=".zip,application/zip"
+          style={{ display: 'none' }}
+          onChange={onImport}
+        />
+        <p className="muted" style={{ marginBottom: 0, marginTop: 10, fontSize: '0.75rem' }}>
+          Everything lives on this device only. Export downloads a .zip with all your
+          data plus your progress photos as regular JPEGs — stash it somewhere safe
+          (Files, iCloud, wherever). Restore replaces the app's data with a backup.
+        </p>
       </div>
     </>
   )
@@ -262,6 +333,8 @@ export default function SettingsPage() {
       >
         Seal the pact
       </button>
+
+      <DataVault />
     </div>
   )
 }
