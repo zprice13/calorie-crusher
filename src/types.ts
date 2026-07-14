@@ -68,7 +68,7 @@ export interface ProgressPhoto {
   createdAt: number
 }
 
-/** A completed workout that credits burned calories to a day. */
+/** Legacy pre-v5 workout record; migrated into WorkoutLog. */
 export interface ExerciseLog {
   id?: number
   date: string
@@ -76,6 +76,31 @@ export interface ExerciseLog {
   minutes: number
   kcalBurned: number
   createdAt: number
+}
+
+export type WorkoutCategory = 'lift' | 'cardio' | 'calisthenics'
+
+/** One logged workout: a lift set-group, a cardio session, or a calisthenics set-group. */
+export interface WorkoutLog {
+  id?: number
+  date: string
+  category: WorkoutCategory
+  exercise: string
+  /** Lifts: load in kg (displayed per unit setting). */
+  weightKg?: number
+  /** Lifts & calisthenics: reps per set. */
+  reps?: number
+  /** Lifts & calisthenics: number of sets. */
+  sets?: number
+  /** Cardio: duration. */
+  minutes?: number
+  kcalBurned: number
+  createdAt: number
+}
+
+/** Epley estimated one-rep max. */
+export function epley1Rm(weightKg: number, reps: number): number {
+  return reps <= 1 ? weightKg : weightKg * (1 + reps / 30)
 }
 
 /** A recurring planned workout on a weekday (0 = Sunday). */

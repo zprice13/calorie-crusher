@@ -32,7 +32,7 @@ export default function DiaryPage() {
   )
   const settings = useLiveQuery(() => db.settings.get('settings'), [])
   const exercise = useLiveQuery(
-    () => db.exerciseLogs.where('date').equals(date).toArray(),
+    () => db.workouts.where('date').equals(date).toArray(),
     [date],
   )
 
