@@ -2,12 +2,22 @@ import { db } from '../db'
 import { todayStr, type ProgressPhoto } from '../types'
 import { createZip, readZip, type ZipInput } from './zip'
 
-const BACKUP_FORMAT = 1
+/** Format 2 added `workouts`; format-1 backups carried `exerciseLogs`,
+ * which restore as cardio workouts. */
+const BACKUP_FORMAT = 2
 
 interface PhotoMeta {
   date: string
   createdAt: number
   file: string
+}
+
+interface LegacyExerciseLog {
+  date: string
+  name: string
+  minutes: number
+  kcalBurned: number
+  createdAt: number
 }
 
 interface BackupData {
@@ -18,21 +28,22 @@ interface BackupData {
   diary: unknown[]
   weights: unknown[]
   waterLogs: unknown[]
-  exerciseLogs: unknown[]
+  workouts?: unknown[]
+  exerciseLogs?: LegacyExerciseLog[]
   plannedExercises: unknown[]
   photos: PhotoMeta[]
 }
 
 /** Bundle every table plus photo JPEGs into a ZIP blob. */
 export async function exportBackup(): Promise<{ blob: Blob; filename: string }> {
-  const [settings, foods, diary, weights, waterLogs, exerciseLogs, plannedExercises, photos] =
+  const [settings, foods, diary, weights, waterLogs, workouts, plannedExercises, photos] =
     await Promise.all([
       db.settings.toArray(),
       db.foods.toArray(),
       db.diary.toArray(),
       db.weights.toArray(),
       db.waterLogs.toArray(),
-      db.exerciseLogs.toArray(),
+      db.workouts.toArray(),
       db.plannedExercises.toArray(),
       db.photos.toArray(),
     ])
@@ -54,7 +65,7 @@ export async function exportBackup(): Promise<{ blob: Blob; filename: string }> 
     diary: diary.map(({ id: _id, ...rest }) => rest),
     weights: weights.map(({ id: _id, ...rest }) => rest),
     waterLogs: waterLogs.map(({ id: _id, ...rest }) => rest),
-    exerciseLogs: exerciseLogs.map(({ id: _id, ...rest }) => rest),
+    workouts: workouts.map(({ id: _id, ...rest }) => rest),
     plannedExercises: plannedExercises.map(({ id: _id, ...rest }) => rest),
     photos: photoMeta,
   }
@@ -83,9 +94,21 @@ export async function importBackup(file: File): Promise<RestoreCounts> {
   const raw = entries.get('data.json')
   if (!raw) throw new Error('data.json missing — not a Calorie Crusher backup')
   const data = JSON.parse(new TextDecoder().decode(raw)) as BackupData
-  if (data.format !== BACKUP_FORMAT || !Array.isArray(data.diary)) {
+  if (![1, 2].includes(data.format) || !Array.isArray(data.diary)) {
     throw new Error('Unrecognized backup format')
   }
+
+  // Format-1 backups have exerciseLogs instead of workouts.
+  const workouts =
+    data.workouts ??
+    (data.exerciseLogs ?? []).map((e) => ({
+      date: e.date,
+      category: 'cardio' as const,
+      exercise: e.name,
+      minutes: e.minutes,
+      kcalBurned: e.kcalBurned,
+      createdAt: e.createdAt,
+    }))
 
   const photos: Omit<ProgressPhoto, 'id'>[] = []
   for (const meta of data.photos ?? []) {
@@ -100,7 +123,7 @@ export async function importBackup(file: File): Promise<RestoreCounts> {
 
   await db.transaction(
     'rw',
-    [db.settings, db.foods, db.diary, db.weights, db.waterLogs, db.exerciseLogs, db.plannedExercises, db.photos],
+    [db.settings, db.foods, db.diary, db.weights, db.waterLogs, db.workouts, db.plannedExercises, db.photos],
     async () => {
       await Promise.all([
         db.settings.clear(),
@@ -108,7 +131,7 @@ export async function importBackup(file: File): Promise<RestoreCounts> {
         db.diary.clear(),
         db.weights.clear(),
         db.waterLogs.clear(),
-        db.exerciseLogs.clear(),
+        db.workouts.clear(),
         db.plannedExercises.clear(),
         db.photos.clear(),
       ])
@@ -123,7 +146,7 @@ export async function importBackup(file: File): Promise<RestoreCounts> {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       await db.waterLogs.bulkAdd(data.waterLogs as any)
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      await db.exerciseLogs.bulkAdd(data.exerciseLogs as any)
+      await db.workouts.bulkAdd(workouts as any)
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       await db.plannedExercises.bulkAdd(data.plannedExercises as any)
       await db.photos.bulkAdd(photos)
@@ -134,7 +157,7 @@ export async function importBackup(file: File): Promise<RestoreCounts> {
     diary: data.diary.length,
     weights: data.weights.length,
     water: data.waterLogs.length,
-    exercise: data.exerciseLogs.length,
+    exercise: workouts.length,
     photos: photos.length,
   }
 }

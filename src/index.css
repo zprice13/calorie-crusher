@@ -771,6 +771,45 @@ label.field {
   text-align: center;
 }
 
+/* ---------- Workout categories & PRs ---------- */
+.cat-badge {
+  flex: 0 0 auto;
+  font-size: 0.58rem;
+  font-weight: 900;
+  font-style: italic;
+  letter-spacing: 0.08em;
+  padding: 3px 6px;
+  border-radius: 3px;
+  border: 1px solid currentColor;
+}
+
+.cat-lift {
+  color: var(--hype-2);
+}
+
+.cat-cardio {
+  color: var(--water);
+}
+
+.cat-calisthenics {
+  color: var(--thermal);
+}
+
+.pr-hint {
+  margin-top: 6px;
+  font-size: 0.74rem;
+  font-weight: 800;
+  color: var(--hype-2);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.pr-trophy {
+  flex: 0 0 auto;
+  font-size: 1rem;
+  filter: drop-shadow(1px 1px 0 rgba(0, 0, 0, 0.7));
+}
+
 /* ---------- Progress photos ---------- */
 .photo-grid {
   display: grid;
