@@ -52,6 +52,14 @@ export interface WeightEntry {
   createdAt: number
 }
 
+/** One water intake event; ml internally, fl oz in the imperial UI. */
+export interface WaterLog {
+  id?: number
+  date: string
+  ml: number
+  createdAt: number
+}
+
 /** A completed workout that credits burned calories to a day. */
 export interface ExerciseLog {
   id?: number
@@ -80,6 +88,8 @@ export interface Settings {
   carbsPct: number
   fatPct: number
   weightGoalKg?: number
+  /** Daily water goal in ml. */
+  waterGoalMl?: number
   unit: 'metric' | 'imperial'
   /** Profile for TDEE estimation (optional). */
   sex?: 'male' | 'female'
@@ -129,6 +139,22 @@ export function formatDateLabel(date: string): string {
 export const KG_PER_LB = 0.45359237
 export const GRAMS_PER_OZ = 28.349523125
 export const CM_PER_IN = 2.54
+export const ML_PER_FLOZ = 29.5735295625
+
+/** 64 fl oz — the classic "eight 8-oz glasses". */
+export const DEFAULT_WATER_GOAL_ML = Math.round(64 * ML_PER_FLOZ)
+
+export function waterToDisplay(ml: number, unit: Settings['unit']): number {
+  return unit === 'imperial' ? Math.round(ml / ML_PER_FLOZ) : Math.round(ml)
+}
+
+export function waterToMl(value: number, unit: Settings['unit']): number {
+  return unit === 'imperial' ? value * ML_PER_FLOZ : value
+}
+
+export function waterUnitLabel(unit: Settings['unit']): string {
+  return unit === 'imperial' ? 'fl oz' : 'ml'
+}
 
 /** Food amounts are stored in grams; imperial users see/enter ounces. */
 export function foodAmountToGrams(value: number, unit: Settings['unit']): number {

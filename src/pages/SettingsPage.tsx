@@ -3,11 +3,15 @@ import { useLiveQuery } from 'dexie-react-hooks'
 import { db, latestWeightKg, saveSettings } from '../db'
 import {
   DEFAULT_SETTINGS,
+  DEFAULT_WATER_GOAL_ML,
   displayToKg,
   estimateTdee,
   ftInToHeightCm,
   heightCmToFtIn,
   kgToDisplay,
+  waterToDisplay,
+  waterToMl,
+  waterUnitLabel,
   weightUnitLabel,
   type Settings,
 } from '../types'
@@ -137,6 +141,20 @@ export default function SettingsPage() {
             Macro split adds to {macroSum}% — it must total 100%.
           </p>
         )}
+
+        <label className="field" htmlFor="water-goal">
+          Water goal ({waterUnitLabel(form.unit)})
+        </label>
+        <input
+          id="water-goal"
+          type="number"
+          inputMode="numeric"
+          value={waterToDisplay(form.waterGoalMl ?? DEFAULT_WATER_GOAL_ML, form.unit)}
+          onChange={(e) => {
+            const v = parseFloat(e.target.value)
+            patch({ waterGoalMl: v > 0 ? waterToMl(v, form.unit) : undefined })
+          }}
+        />
       </div>
 
       <h2>Body & units</h2>
