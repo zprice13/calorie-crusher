@@ -1,5 +1,6 @@
+import { useState } from 'react'
 import { useLiveQuery } from 'dexie-react-hooks'
-import { db } from '../db'
+import { db, saveSettings } from '../db'
 import {
   DEFAULT_WATER_GOAL_ML,
   waterToDisplay,
@@ -22,6 +23,8 @@ export default function WaterCard({ date, unit, goalMl }: {
 }) {
   const toast = useToast()
   const logs = useLiveQuery(() => db.waterLogs.where('date').equals(date).toArray(), [date])
+  const [editingGoal, setEditingGoal] = useState(false)
+  const [goalStr, setGoalStr] = useState('')
 
   const goal = goalMl ?? DEFAULT_WATER_GOAL_ML
   const totalMl = (logs ?? []).reduce((sum, l) => sum + l.ml, 0)
@@ -54,13 +57,49 @@ export default function WaterCard({ date, unit, goalMl }: {
     if (last) await db.waterLogs.delete(last.id!)
   }
 
+  async function saveGoal() {
+    const v = parseFloat(goalStr)
+    if (!v || v <= 0) {
+      setEditingGoal(false)
+      return
+    }
+    await saveSettings({ waterGoalMl: waterToMl(v, unit) })
+    setEditingGoal(false)
+    toast(`Hydration goal set: ${Math.round(v)} ${label}!`)
+  }
+
   return (
     <div className="card water-card">
       <div className="meal-head" style={{ marginBottom: 8 }}>
         <h2 style={{ margin: 0 }}>Hydration protocol</h2>
-        <span className="kcal" style={{ color: 'var(--water)' }}>
-          {total} / {goalDisplay} {label}
-        </span>
+        {editingGoal ? (
+          <span className="water-goal-edit">
+            <input
+              autoFocus
+              type="number"
+              inputMode="numeric"
+              min={1}
+              value={goalStr}
+              onChange={(e) => setGoalStr(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && saveGoal()}
+              aria-label={`Daily water goal (${label})`}
+            />
+            <button className="water-btn" onClick={saveGoal} aria-label="Save goal">
+              ✓
+            </button>
+          </span>
+        ) : (
+          <button
+            className="water-goal-btn"
+            onClick={() => {
+              setGoalStr(String(goalDisplay))
+              setEditingGoal(true)
+            }}
+            aria-label={`Edit daily water goal (currently ${goalDisplay} ${label})`}
+          >
+            {total} / {goalDisplay} {label} ✎
+          </button>
+        )}
       </div>
 
       <div className="meter water-meter">
