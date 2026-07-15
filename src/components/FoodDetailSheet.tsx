@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { db } from '../db'
 import {
@@ -123,7 +124,9 @@ export default function FoodDetailSheet({
     }
   }
 
-  return (
+  // Portaled to <body>: guarantees the modal paints above the app shell on
+  // iOS, where composited scrollers can invert in-tree stacking order.
+  return createPortal(
     <div className="sheet-backdrop" onClick={onClose}>
       <div className="sheet" onClick={(e) => e.stopPropagation()}>
         <h3>{food.name}</h3>
@@ -198,6 +201,7 @@ export default function FoodDetailSheet({
           </button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body,
   )
 }

@@ -6,6 +6,7 @@ import {
   useState,
   type ReactNode,
 } from 'react'
+import { createPortal } from 'react-dom'
 
 const ToastContext = createContext<(msg: string) => void>(() => {})
 
@@ -26,11 +27,13 @@ export function ToastProvider({ children }: { children: ReactNode }) {
   return (
     <ToastContext.Provider value={show}>
       {children}
-      {msg && (
-        <div className="toast" role="status">
-          {msg}
-        </div>
-      )}
+      {msg &&
+        createPortal(
+          <div className="toast" role="status">
+            {msg}
+          </div>,
+          document.body,
+        )}
     </ToastContext.Provider>
   )
 }

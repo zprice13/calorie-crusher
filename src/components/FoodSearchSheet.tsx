@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { db } from '../db'
 import { searchProducts } from '../api/openFoodFacts'
@@ -83,7 +84,9 @@ export default function FoodSearchSheet({ date, meal, onClose }: Props) {
 
   const list = results ?? recents ?? []
 
-  return (
+  // Portaled to <body> so it always paints above the app shell (iOS
+  // composited scrollers can invert in-tree stacking order).
+  return createPortal(
     <>
       <div className="search-overlay">
         <div className="search-head">
@@ -180,7 +183,8 @@ export default function FoodSearchSheet({ date, meal, onClose }: Props) {
           onClose={() => setShowCustom(false)}
         />
       )}
-    </>
+    </>,
+    document.body,
   )
 }
 
