@@ -43,16 +43,35 @@ body,
   height: 100%;
 }
 
+html {
+  /* Matches the nav's base color: iOS standalone gives the app a viewport
+     shorter than the screen (by the status-bar inset) and paints only the
+     document background into the leftover strip under the nav — so that
+     strip must read as a seamless extension of the nav, not wallpaper. */
+  background: #180a28;
+}
+
 body {
   margin: 0;
-  /* The document never scrolls; .page is the scroll container. This keeps
-     the nav a real layout element (no iOS fixed-position jank) and pins the
-     background in place. */
+  /* The document never scrolls; .page is the scroll container. */
   overflow: hidden;
   color: var(--text-primary);
   font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
   -webkit-font-smoothing: antialiased;
-  /* Deep purple page with manga speed-lines radiating faintly */
+  background: #180a28;
+}
+
+.app {
+  /* Anchored like the splash overlay: fixed positioning tracks the visual
+     viewport on iOS standalone more reliably than height units. */
+  position: fixed;
+  inset: 0;
+  max-width: 480px;
+  margin-inline: auto;
+  display: flex;
+  flex-direction: column;
+  /* Deep purple page with manga speed-lines radiating faintly (lives on
+     the shell, not the document, so the strip below stays nav-colored). */
   background:
     repeating-linear-gradient(
       115deg,
@@ -63,18 +82,15 @@ body {
     var(--page);
 }
 
-.app {
-  /* Anchor the shell to the real visual viewport the same way the splash
-     overlay is (fixed positioning reaches the true screen bottom on iOS
-     standalone, while height units — %, vh, even dvh — can report a
-     viewport that excludes the home-indicator region and leave a dead
-     band under the nav). */
-  position: fixed;
-  inset: 0;
-  max-width: 480px;
-  margin-inline: auto;
-  display: flex;
-  flex-direction: column;
+/* Installed to the home screen: some iOS builds under-report every viewport
+   measure except lvh. If lvh resolves to the true screen height, this lets
+   the nav reach the real bottom edge; if it resolves the same as the rest,
+   it's a no-op and the html background handles the leftover strip. */
+@media (display-mode: standalone) {
+  .app {
+    bottom: auto;
+    height: 100lvh;
+  }
 }
 
 .page {

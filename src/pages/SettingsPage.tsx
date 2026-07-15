@@ -139,15 +139,21 @@ function DataVault() {
 function ViewportDiagnostics() {
   const [info, setInfo] = useState('')
   useEffect(() => {
-    const probe = document.createElement('div')
-    probe.style.cssText =
-      'position:fixed;bottom:0;height:env(safe-area-inset-bottom,0px);width:0;visibility:hidden'
-    document.body.appendChild(probe)
-    const insetB = Math.round(probe.getBoundingClientRect().height)
-    probe.remove()
+    const measure = (cssHeight: string) => {
+      const probe = document.createElement('div')
+      probe.style.cssText = `position:fixed;top:0;height:${cssHeight};width:0;visibility:hidden`
+      document.body.appendChild(probe)
+      const h = Math.round(probe.getBoundingClientRect().height)
+      probe.remove()
+      return h
+    }
+    const insetB = measure('env(safe-area-inset-bottom,0px)')
+    const lvh = measure('100lvh')
+    const svh = measure('100svh')
+    const dvh = measure('100dvh')
     const nav = document.querySelector('.bottom-nav')?.getBoundingClientRect()
     setInfo(
-      `dbg: innerH ${window.innerHeight} · visualH ${Math.round(window.visualViewport?.height ?? 0)} · screenH ${window.screen.height} · insetB ${insetB} · navBottom ${Math.round(nav?.bottom ?? 0)}`,
+      `dbg2: innerH ${window.innerHeight} · visualH ${Math.round(window.visualViewport?.height ?? 0)} · screenH ${window.screen.height} · lvh ${lvh} · svh ${svh} · dvh ${dvh} · insetB ${insetB} · navBottom ${Math.round(nav?.bottom ?? 0)}`,
     )
   }, [])
   return (
