@@ -9,7 +9,6 @@ import {
   metBurn,
   todayStr,
   weightUnitLabel,
-  type PlannedExercise,
   type Settings,
   type WorkoutLog,
 } from '../types'
@@ -24,7 +23,6 @@ import {
 } from '../exercises'
 import { useToast } from '../components/Toast'
 
-const WEEKDAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
 const FALLBACK_WEIGHT_KG = 70
 
 async function bodyWeightKg(): Promise<number> {
@@ -169,36 +167,6 @@ export default function ExercisePage() {
     })
     if (navigator.vibrate && isPr) navigator.vibrate([60, 40, 120])
     toast(isPr ? `🏆 NEW REP PR! ${ex.name} × ${reps}!` : `${ex.name} logged: ${sets}×${reps}`)
-  }
-
-  // ---- Weekly cardio plan (legacy feature, still cardio-based) ----
-  const [weekday, setWeekday] = useState(new Date().getDay())
-  const [planActivity, setPlanActivity] = useState(CARDIO[0].name)
-  const [planMinutes, setPlanMinutes] = useState('30')
-  const plan = useLiveQuery(
-    () => db.plannedExercises.where('weekday').equals(weekday).toArray(),
-    [weekday],
-  )
-
-  async function addToPlan() {
-    const mins = parseInt(planMinutes, 10)
-    const act = CARDIO.find((a) => a.name === planActivity)
-    if (!act || !mins || mins <= 0) return
-    await db.plannedExercises.add({ weekday, name: act.name, minutes: mins, met: act.met })
-    toast(`${WEEKDAYS[weekday]}'s destiny is written!`)
-  }
-
-  async function completePlanned(p: PlannedExercise) {
-    const kcal = metBurn(p.met, await bodyWeightKg(), p.minutes)
-    await db.workouts.add({
-      date: today,
-      category: 'cardio',
-      exercise: p.name,
-      minutes: p.minutes,
-      kcalBurned: kcal,
-      createdAt: Date.now(),
-    })
-    toast(`${p.name} conquered: ~${kcal} kcal obliterated!`)
   }
 
   const prList = useMemo(() => {
@@ -457,84 +425,6 @@ export default function ExercisePage() {
         </>
       )}
 
-      <h2>Weekly cardio plan</h2>
-      <div className="weekday-tabs">
-        {WEEKDAYS.map((d, i) => (
-          <button key={d} className={i === weekday ? 'active' : ''} onClick={() => setWeekday(i)}>
-            {d}
-          </button>
-        ))}
-      </div>
-
-      <div className="card" style={{ padding: '2px 14px' }}>
-        {(plan ?? []).length === 0 && (
-          <div className="muted" style={{ padding: '10px 0' }}>
-            Rest day on {WEEKDAYS[weekday]}?! …Fine. Even legends must recover.
-          </div>
-        )}
-        {(plan ?? []).map((p) => (
-          <div className="entry" key={p.id}>
-            <div className="info">
-              <div className="name">{p.name}</div>
-              <div className="detail">{p.minutes} min · MET {p.met}</div>
-            </div>
-            {weekday === new Date().getDay() && (
-              <button
-                aria-label={`Mark ${p.name} done`}
-                style={{ color: 'var(--status-good)', fontSize: '0.8rem' }}
-                onClick={() => completePlanned(p)}
-              >
-                ✓ Done
-              </button>
-            )}
-            <button aria-label={`Remove ${p.name} from plan`} onClick={() => db.plannedExercises.delete(p.id!)}>
-              ×
-            </button>
-          </div>
-        ))}
-      </div>
-
-      <div className="card" style={{ marginTop: 10 }}>
-        <div className="row">
-          <div style={{ flex: 2 }}>
-            <label className="field" htmlFor="plan-activity">
-              Activity
-            </label>
-            <select
-              id="plan-activity"
-              value={planActivity}
-              onChange={(e) => setPlanActivity(e.target.value)}
-            >
-              {CARDIO.map((a) => (
-                <option key={a.name} value={a.name}>
-                  {a.name}
-                </option>
-              ))}
-            </select>
-          </div>
-          <div>
-            <label className="field" htmlFor="plan-minutes">
-              Minutes
-            </label>
-            <input
-              id="plan-minutes"
-              type="number"
-              inputMode="numeric"
-              min={1}
-              value={planMinutes}
-              onChange={(e) => setPlanMinutes(e.target.value)}
-            />
-          </div>
-        </div>
-        <button
-          className="secondary"
-          style={{ width: '100%', marginTop: 12 }}
-          onClick={addToPlan}
-          disabled={!parseInt(planMinutes, 10)}
-        >
-          Add to {WEEKDAYS[weekday]} plan
-        </button>
-      </div>
     </div>
   )
 }
