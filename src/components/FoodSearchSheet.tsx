@@ -18,7 +18,8 @@ interface Props {
   onClose: () => void
 }
 
-/** Search sheet: recents, Open Food Facts text search, and a custom-food form. */
+/** Full-screen food search: pinned search field, scrolling results,
+ * recents, and a custom-food entry point. */
 export default function FoodSearchSheet({ date, meal, onClose }: Props) {
   const [query, setQuery] = useState('')
   const [results, setResults] = useState<Food[] | null>(null)
@@ -35,7 +36,7 @@ export default function FoodSearchSheet({ date, meal, onClose }: Props) {
   const settings = useLiveQuery(() => db.settings.get('settings'), [])
   const unit = (settings ?? DEFAULT_SETTINGS).unit
 
-  // Escape closes this sheet, unless a child sheet is open (it handles its own).
+  // Escape closes this view, unless a child sheet is open (it handles its own).
   const hasChild = selected !== null || showCustom
   useEffect(() => {
     if (hasChild) return
@@ -74,67 +75,86 @@ export default function FoodSearchSheet({ date, meal, onClose }: Props) {
     }
   }, [query])
 
+  function pick(food: Food) {
+    // Dismiss the keyboard before the portion sheet slides up.
+    ;(document.activeElement as HTMLElement | null)?.blur?.()
+    setSelected(food)
+  }
+
   const list = results ?? recents ?? []
 
   return (
     <>
-      <div className="sheet-backdrop" onClick={onClose}>
-        <div className="sheet" onClick={(e) => e.stopPropagation()}>
-          <h3>Add food · {meal[0].toUpperCase() + meal.slice(1)}</h3>
+      <div className="search-overlay">
+        <div className="search-head">
+          <button className="search-back" onClick={onClose} aria-label="Back">
+            ‹
+          </button>
           <input
             autoFocus
+            type="search"
             placeholder="Search foods (e.g. greek yogurt)…"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            style={{ marginTop: 10 }}
           />
-          <div className="muted" style={{ marginTop: 8 }}>
-            {searching
-              ? 'Searching Open Food Facts…'
-              : searchError ??
-                (results ? `${results.length} results` : 'Recent foods')}
-          </div>
+        </div>
+        <div className="muted" style={{ margin: '8px 2px' }}>
+          {searching
+            ? 'Searching Open Food Facts…'
+            : (searchError ?? (results ? `${results.length} results` : 'Recent foods'))}
+          {` · adding to ${meal}`}
+        </div>
 
-          <div>
-            {list.map((f) => (
-              <button key={f.id} className="result-item" onClick={() => setSelected(f)}>
-                {f.imageUrl ? (
-                  <img src={f.imageUrl} alt="" />
-                ) : (
-                  <div
-                    style={{
-                      width: 40,
-                      height: 40,
-                      borderRadius: 8,
-                      background: 'var(--surface-2)',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      color: 'var(--text-muted)',
-                    }}
-                  >
-                    🍽
-                  </div>
-                )}
-                <div className="info" style={{ flex: 1, minWidth: 0 }}>
-                  <div className="name" style={{ fontSize: '0.9rem' }}>
-                    {f.name}
-                  </div>
-                  <div className="detail muted" style={{ fontSize: '0.75rem' }}>
-                    {f.brand ? `${f.brand} · ` : ''}
-                    {unit === 'imperial'
-                      ? `${Math.round((f.per100.kcal * GRAMS_PER_OZ) / 100)} kcal / oz`
-                      : `${f.per100.kcal} kcal / 100 g`}
-                  </div>
+        <div className="search-results">
+          {list.map((f) => (
+            <button key={f.id} className="result-item" onClick={() => pick(f)}>
+              {f.imageUrl ? (
+                <img src={f.imageUrl} alt="" />
+              ) : (
+                <div
+                  style={{
+                    width: 40,
+                    height: 40,
+                    borderRadius: 8,
+                    background: 'var(--surface-2)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    color: 'var(--text-muted)',
+                    flex: '0 0 40px',
+                  }}
+                >
+                  🍽
                 </div>
-              </button>
-            ))}
-          </div>
+              )}
+              <div className="info" style={{ flex: 1, minWidth: 0 }}>
+                <div className="name" style={{ fontSize: '0.9rem' }}>
+                  {f.name}
+                </div>
+                <div className="detail muted" style={{ fontSize: '0.75rem' }}>
+                  {f.brand ? `${f.brand} · ` : ''}
+                  {unit === 'imperial'
+                    ? `${Math.round((f.per100.kcal * GRAMS_PER_OZ) / 100)} kcal / oz`
+                    : `${f.per100.kcal} kcal / 100 g`}
+                </div>
+              </div>
+            </button>
+          ))}
+          {list.length === 0 && !searching && (
+            <div className="muted" style={{ padding: '16px 2px' }}>
+              {results
+                ? 'Nothing found. It escaped… this time.'
+                : 'Scan or search a food and it will show up here.'}
+            </div>
+          )}
 
           <button
             className="add-food-btn"
             style={{ marginTop: 12 }}
-            onClick={() => setShowCustom(true)}
+            onClick={() => {
+              ;(document.activeElement as HTMLElement | null)?.blur?.()
+              setShowCustom(true)
+            }}
           >
             + Forge a custom food
           </button>
@@ -151,7 +171,7 @@ export default function FoodSearchSheet({ date, meal, onClose }: Props) {
         />
       )}
       {showCustom && (
-        <CustomFoodSheet
+        <CustomFoodView
           unit={unit}
           onCreated={(f) => {
             setShowCustom(false)
@@ -164,7 +184,7 @@ export default function FoodSearchSheet({ date, meal, onClose }: Props) {
   )
 }
 
-function CustomFoodSheet({
+function CustomFoodView({
   unit,
   onCreated,
   onClose,
@@ -208,10 +228,17 @@ function CustomFoodSheet({
   const refLabel = unit === 'imperial' ? 'per oz' : 'per 100 g'
 
   return (
-    <div className="sheet-backdrop" onClick={onClose}>
-      <div className="sheet" onClick={(e) => e.stopPropagation()}>
-        <h3>Forge custom food</h3>
-        <div className="muted">Enter nutrition {refLabel}.</div>
+    <div className="search-overlay" style={{ zIndex: 26 }}>
+      <div className="search-head">
+        <button className="search-back" onClick={onClose} aria-label="Back">
+          ‹
+        </button>
+        <h3 style={{ margin: 0, flex: 1 }}>Forge custom food</h3>
+      </div>
+      <div className="search-results">
+        <div className="muted" style={{ margin: '8px 2px' }}>
+          Enter nutrition {refLabel}.
+        </div>
         <label className="field">Name</label>
         <input value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. Homemade granola" />
         <div className="row">
@@ -234,14 +261,14 @@ function CustomFoodSheet({
             <input type="number" inputMode="decimal" value={fat} onChange={(e) => setFat(e.target.value)} />
           </div>
         </div>
-        <div className="row" style={{ marginTop: 14 }}>
-          <button className="secondary" onClick={onClose}>
-            Cancel
-          </button>
-          <button className="primary" onClick={create} disabled={!name.trim() || !kcal}>
-            Continue
-          </button>
-        </div>
+        <button
+          className="primary"
+          style={{ width: '100%', marginTop: 16 }}
+          onClick={create}
+          disabled={!name.trim() || !kcal}
+        >
+          Continue
+        </button>
       </div>
     </div>
   )
