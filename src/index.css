@@ -1016,17 +1016,25 @@ label.field {
 }
 
 .mascot.flexing {
-  animation: flex-pump 1.1s ease-in-out infinite;
-  transform-origin: 50% 90%;
+  animation: neon-pulse 1.6s ease-in-out infinite;
+  transform-origin: 50% 50%;
 }
 
-@keyframes flex-pump {
+@keyframes neon-pulse {
   0%,
   100% {
-    transform: scale(1) rotate(-2deg);
+    transform: scale(1);
+    opacity: 1;
+  }
+  8% {
+    opacity: 0.75;
+  }
+  12% {
+    opacity: 1;
   }
   50% {
-    transform: scale(1.06) rotate(2deg);
+    transform: scale(1.05);
+    opacity: 0.92;
   }
 }
 
