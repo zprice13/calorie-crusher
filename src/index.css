@@ -95,6 +95,12 @@ body {
   /* The nav pill sits below this scroll area, so content can never render
      behind it: fully scrolled, the last element always rests 24px above. */
   padding: calc(16px + env(safe-area-inset-top, 0px)) 16px 24px;
+  /* Overlay scrollbars off — scrolling itself is untouched. */
+  scrollbar-width: none;
+}
+
+.page::-webkit-scrollbar {
+  display: none;
 }
 
 /* ---------- MANGA TYPOGRAPHY ---------- */
@@ -554,15 +560,22 @@ label.field {
 }
 
 /* ---------- Scanner (THERMAL VISION) ---------- */
+/* The scan page is a static full-height layout: no scrolling, the thermal
+   viewport takes the full width and absorbs all free vertical space. */
+.scan-layout {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
 .scanner-viewport {
   position: relative;
   border-radius: var(--radius);
   overflow: hidden;
   background: #000;
-  aspect-ratio: 3 / 4;
-  /* Cap so the whole scan page (title, viewport, manual entry, credit)
-     fits a phone viewport instead of running under the bottom nav. */
-  max-height: 44vh;
+  flex: 1;
+  min-height: 140px;
+  width: 100%;
   border: 2px solid var(--thermal);
   box-shadow: 0 0 18px rgba(57, 255, 106, 0.35), 5px 5px 0 rgba(0, 0, 0, 0.55);
 }

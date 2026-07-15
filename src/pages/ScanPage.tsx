@@ -53,7 +53,7 @@ export default function ScanPage({ onLogged }: { onLogged: () => void }) {
   }
 
   return (
-    <div>
+    <div className="scan-layout">
       <h1>Target acquisition</h1>
 
       <div className={`scanner-viewport ${scanner.state === 'scanning' ? 'thermal' : ''}`}>
