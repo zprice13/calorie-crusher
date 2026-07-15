@@ -238,6 +238,23 @@ select {
   border-radius: var(--radius);
   padding: 10px 12px;
   width: 100%;
+  min-height: 46px;
+}
+
+/* iOS renders date inputs with its own oversized chrome that ignores the
+   flex row (it collided with the weight field on Mass Monitor). Strip the
+   native appearance so it sizes and themes like every other field. */
+input[type='date'] {
+  -webkit-appearance: none;
+  appearance: none;
+  display: flex;
+  align-items: center;
+  min-width: 0;
+}
+
+input[type='date']::-webkit-date-and-time-value {
+  text-align: left;
+  margin: 0;
 }
 
 input:focus,
@@ -264,7 +281,10 @@ label.field {
 }
 
 .row > * {
-  flex: 1;
+  /* Equal columns regardless of intrinsic widths (iOS date inputs are
+     stubborn about theirs), matching the exercise-logging field rows. */
+  flex: 1 1 0;
+  min-width: 0;
 }
 
 .muted {
