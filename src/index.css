@@ -82,15 +82,16 @@ body {
     var(--page);
 }
 
-/* Installed to the home screen: some iOS builds under-report every viewport
-   measure except lvh. If lvh resolves to the true screen height, this lets
-   the nav reach the real bottom edge; if it resolves the same as the rest,
-   it's a no-op and the html background handles the leftover strip. */
-@media (display-mode: standalone) {
-  .app {
-    bottom: auto;
-    height: 100lvh;
-  }
+/* iOS standalone (observed on-device): the app viewport is shorter than the
+   screen by the status-bar inset, and NOTHING paints below it — sizing the
+   shell taller (100lvh reaches the real screen height) just gets the nav's
+   lower half clipped. The .viewport-clipped class is set by main.tsx when
+   this quirk is detected: keep the shell inside the paintable viewport and
+   drop the nav's home-indicator padding, since the indicator actually sits
+   in the nav-colored strip below the viewport (html background). */
+.viewport-clipped .bottom-nav {
+  height: var(--nav-height);
+  padding-bottom: 0;
 }
 
 .page {
