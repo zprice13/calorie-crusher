@@ -90,7 +90,10 @@ body {
   flex: 1;
   min-height: 0;
   overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
+  /* NOTE: never add -webkit-overflow-scrolling: touch here — it forces the
+     scroller into its own compositing layer on iOS, which painted the nav
+     above modals regardless of z-index. Momentum scrolling is the default
+     on modern iOS anyway. */
   overscroll-behavior: contain;
   /* The nav pill sits below this scroll area, so content can never render
      behind it: fully scrolled, the last element always rests 24px above. */

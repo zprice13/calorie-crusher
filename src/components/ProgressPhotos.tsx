@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { db } from '../db'
 import {
@@ -146,8 +147,9 @@ export default function ProgressPhotos({ unit }: { unit: Settings['unit'] }) {
         </p>
       </div>
 
-      {viewing && (
-        <div className="sheet-backdrop" onClick={() => setViewing(null)}>
+      {viewing &&
+        createPortal(
+          <div className="sheet-backdrop" onClick={() => setViewing(null)}>
           <div className="sheet photo-viewer" onClick={(e) => e.stopPropagation()}>
             <h3>{photoCaption(viewing, weights ?? [], unit)}</h3>
             <img src={urls.get(viewing.id!)} alt={`Progress photo ${viewing.date}`} />
@@ -160,11 +162,15 @@ export default function ProgressPhotos({ unit }: { unit: Settings['unit'] }) {
               </button>
             </div>
           </div>
-        </div>
-      )}
+        </div>,
+          document.body,
+        )}
 
-      {comparing && first && latest && (
-        <div className="sheet-backdrop" onClick={() => setComparing(false)}>
+      {comparing &&
+        first &&
+        latest &&
+        createPortal(
+          <div className="sheet-backdrop" onClick={() => setComparing(false)}>
           <div className="sheet photo-viewer" onClick={(e) => e.stopPropagation()}>
             <h3>The transformation</h3>
             <div className="compare-grid">
@@ -185,8 +191,9 @@ export default function ProgressPhotos({ unit }: { unit: Settings['unit'] }) {
               Close
             </button>
           </div>
-        </div>
-      )}
+        </div>,
+          document.body,
+        )}
     </>
   )
 }
