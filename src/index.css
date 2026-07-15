@@ -1216,8 +1216,9 @@ label.field {
   line-height: 1.7;
   text-align: center;
   max-width: 85vw;
-  color: var(--thermal);
-  text-shadow: 0 0 8px rgba(57, 255, 106, 0.7);
+  /* Matches the neon bolt's electric cyan. */
+  color: #2ee6ff;
+  text-shadow: 0 0 8px rgba(46, 230, 255, 0.7);
   animation: tagline-in 0.5s ease-out 1.05s both, hudblink 1.2s steps(2) 1.6s infinite;
 }
 
