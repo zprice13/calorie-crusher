@@ -44,11 +44,18 @@ body,
 }
 
 html {
-  /* Matches the nav's base color: iOS standalone gives the app a viewport
-     shorter than the screen (by the status-bar inset) and paints only the
-     document background into the leftover strip under the nav — so that
-     strip must read as a seamless extension of the nav, not wallpaper. */
-  background: #180a28;
+  /* The wallpaper lives on the document root: iOS standalone can leave an
+     unpaintable strip below the web viewport where ONLY the document
+     background renders — with the wallpaper here, that strip continues the
+     backdrop seamlessly and the floating nav never has to touch it. */
+  background:
+    repeating-linear-gradient(
+      115deg,
+      transparent 0 26px,
+      rgba(255, 45, 120, 0.05) 26px 28px
+    ),
+    radial-gradient(circle at 85% -10%, #33104f 0%, transparent 55%),
+    var(--page);
 }
 
 body {
@@ -58,7 +65,7 @@ body {
   color: var(--text-primary);
   font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
   -webkit-font-smoothing: antialiased;
-  background: #180a28;
+  background: transparent;
 }
 
 .app {
@@ -70,28 +77,13 @@ body {
   margin-inline: auto;
   display: flex;
   flex-direction: column;
-  /* Deep purple page with manga speed-lines radiating faintly (lives on
-     the shell, not the document, so the strip below stays nav-colored). */
-  background:
-    repeating-linear-gradient(
-      115deg,
-      transparent 0 26px,
-      rgba(255, 45, 120, 0.05) 26px 28px
-    ),
-    radial-gradient(circle at 85% -10%, #33104f 0%, transparent 55%),
-    var(--page);
 }
 
-/* iOS standalone (observed on-device): the app viewport is shorter than the
-   screen by the status-bar inset, and NOTHING paints below it — sizing the
-   shell taller (100lvh reaches the real screen height) just gets the nav's
-   lower half clipped. The .viewport-clipped class is set by main.tsx when
-   this quirk is detected: keep the shell inside the paintable viewport and
-   drop the nav's home-indicator padding, since the indicator actually sits
-   in the nav-colored strip below the viewport (html background). */
+/* .viewport-clipped is set by main.tsx when iOS standalone leaves an
+   unpaintable strip below the viewport (screen taller than innerHeight):
+   the strip itself then provides the floating nav's bottom clearance. */
 .viewport-clipped .bottom-nav {
-  height: var(--nav-height);
-  padding-bottom: 0;
+  margin-bottom: 10px;
 }
 
 .page {
@@ -100,9 +92,9 @@ body {
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
   overscroll-behavior: contain;
-  /* The nav sits below this scroll area, so content can never render
-     behind it: fully scrolled, the last element always rests 32px above. */
-  padding: calc(16px + env(safe-area-inset-top, 0px)) 16px 32px;
+  /* The nav pill sits below this scroll area, so content can never render
+     behind it: fully scrolled, the last element always rests 24px above. */
+  padding: calc(16px + env(safe-area-inset-top, 0px)) 16px 24px;
 }
 
 /* ---------- MANGA TYPOGRAPHY ---------- */
@@ -142,13 +134,15 @@ h2 {
   position: relative;
 }
 
-/* ---------- Bottom navigation (in-flow flex row, never overlaps) ---------- */
+/* ---------- Bottom navigation: floating comic-panel pill ---------- */
 .bottom-nav {
   flex: 0 0 auto;
-  height: calc(var(--nav-height) + env(safe-area-inset-bottom, 0px));
-  padding-bottom: env(safe-area-inset-bottom, 0px);
-  background: linear-gradient(180deg, #26123c, #180a28);
-  border-top: 2px solid var(--hype-1);
+  height: var(--nav-height);
+  margin: 0 12px calc(10px + env(safe-area-inset-bottom, 0px));
+  background: linear-gradient(180deg, #2c1745, #1c0d2e);
+  border: 2px solid var(--hype-1);
+  border-radius: 16px;
+  box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.55), 4px 4px 0 1px rgba(255, 45, 120, 0.35);
   display: flex;
   justify-content: center;
   z-index: 20;
@@ -777,7 +771,7 @@ label.field {
 
 .toast {
   position: fixed;
-  bottom: calc(var(--nav-height) + 16px + env(safe-area-inset-bottom));
+  bottom: calc(var(--nav-height) + 26px + env(safe-area-inset-bottom, 0px));
   left: 50%;
   transform: translateX(-50%) rotate(-1.5deg);
   background: var(--hype-grad);
