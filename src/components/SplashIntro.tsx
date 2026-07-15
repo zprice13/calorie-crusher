@@ -14,12 +14,11 @@ const TAGLINES = [
   'Steroids have 0 side effects!',
   'Bones are just weak muscles!',
   'Sweat is fat crying!',
-  'Every day is chest day if you believe!',
-  'Abs are made in the kitchen. So is cake!',
   'Your ancestors never counted macros. All dead!',
-  'Cardio? I barely know her!',
   'The mirror fears you now!',
   'Lift first, ask questions never!',
+  'Lift with your back!',
+  'Now with extra oil!',
 ]
 
 function randomTagline(): string {
