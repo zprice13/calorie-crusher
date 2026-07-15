@@ -694,6 +694,21 @@ label.field {
   font-weight: 700;
 }
 
+.edit-facts-btn {
+  display: block;
+  margin-top: 8px;
+  background: none;
+  border: none;
+  padding: 2px 0;
+  font: inherit;
+  font-size: 0.78rem;
+  font-weight: 800;
+  color: var(--hype-2);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+}
+
 /* ---------- Full-screen search overlay (keyboard-friendly) ---------- */
 /* Bottom sheets fight the iOS keyboard (headers pushed off-screen, nav
    floating mid-screen). Search keeps its input pinned at the top, so the
