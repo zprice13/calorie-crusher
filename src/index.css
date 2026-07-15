@@ -64,14 +64,15 @@ body {
 }
 
 .app {
+  /* Anchor the shell to the real visual viewport the same way the splash
+     overlay is (fixed positioning reaches the true screen bottom on iOS
+     standalone, while height units — %, vh, even dvh — can report a
+     viewport that excludes the home-indicator region and leave a dead
+     band under the nav). */
+  position: fixed;
+  inset: 0;
   max-width: 480px;
-  margin: 0 auto;
-  /* iOS standalone resolves percentage heights against a viewport that
-     excludes the home-indicator region, leaving a dead band under the nav.
-     100dvh is the real visible height; 100% is the fallback for old
-     browsers without dvh support. */
-  height: 100%;
-  height: 100dvh;
+  margin-inline: auto;
   display: flex;
   flex-direction: column;
 }

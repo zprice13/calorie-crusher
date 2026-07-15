@@ -129,8 +129,31 @@ function DataVault() {
           data plus your progress photos as regular JPEGs — stash it somewhere safe
           (Files, iCloud, wherever). Restore replaces the app's data with a backup.
         </p>
+        <ViewportDiagnostics />
       </div>
     </>
+  )
+}
+
+/** Tiny layout-debugging readout (helps chase iOS viewport quirks remotely). */
+function ViewportDiagnostics() {
+  const [info, setInfo] = useState('')
+  useEffect(() => {
+    const probe = document.createElement('div')
+    probe.style.cssText =
+      'position:fixed;bottom:0;height:env(safe-area-inset-bottom,0px);width:0;visibility:hidden'
+    document.body.appendChild(probe)
+    const insetB = Math.round(probe.getBoundingClientRect().height)
+    probe.remove()
+    const nav = document.querySelector('.bottom-nav')?.getBoundingClientRect()
+    setInfo(
+      `dbg: innerH ${window.innerHeight} · visualH ${Math.round(window.visualViewport?.height ?? 0)} · screenH ${window.screen.height} · insetB ${insetB} · navBottom ${Math.round(nav?.bottom ?? 0)}`,
+    )
+  }, [])
+  return (
+    <p className="muted" style={{ marginBottom: 0, marginTop: 6, fontSize: '0.62rem', opacity: 0.6 }}>
+      {info}
+    </p>
   )
 }
 
