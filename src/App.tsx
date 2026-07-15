@@ -69,7 +69,8 @@ export default function App() {
     <ToastProvider>
       {intro && <SplashIntro onDone={() => setIntro(false)} />}
       <div className="app">
-        <main className="page">
+        {/* Keyed by tab so each tab opens scrolled to the top. */}
+        <main className="page" key={tab}>
           {tab === 'diary' && <DiaryPage />}
           {tab === 'scan' && <ScanPage onLogged={() => setTab('diary')} />}
           {tab === 'weight' && <WeightPage />}
