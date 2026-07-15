@@ -557,6 +557,38 @@ label.field {
   font-style: normal;
 }
 
+/* Tap the counter to edit the daily goal in place */
+.water-goal-btn {
+  background: none;
+  border: none;
+  padding: 2px 0;
+  font: inherit;
+  font-size: 0.85rem;
+  font-weight: 900;
+  font-variant-numeric: tabular-nums;
+  color: var(--water);
+  text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.8);
+  cursor: pointer;
+}
+
+.water-goal-edit {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.water-goal-edit input {
+  width: 76px;
+  min-height: 38px;
+  padding: 6px 8px;
+  border-color: var(--water);
+}
+
+.water-goal-edit .water-btn {
+  flex: 0 0 auto;
+  padding: 7px 10px;
+}
+
 .water-btn:disabled {
   opacity: 0.4;
   cursor: default;
