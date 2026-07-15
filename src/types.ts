@@ -25,6 +25,8 @@ export interface Food {
   servingLabel?: string
   source: 'openfoodfacts' | 'custom'
   imageUrl?: string
+  /** True when the user has corrected the nutrition facts locally. */
+  edited?: boolean
   lastUsed: number
 }
 
