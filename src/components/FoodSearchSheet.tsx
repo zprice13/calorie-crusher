@@ -31,7 +31,7 @@ export default function FoodSearchSheet({ date, meal, onClose }: Props) {
   const abortRef = useRef<AbortController | null>(null)
 
   const recents = useLiveQuery(
-    () => db.foods.orderBy('lastUsed').reverse().limit(8).toArray(),
+    () => db.foods.orderBy('lastUsed').reverse().limit(40).toArray(),
     [],
   )
   const settings = useLiveQuery(() => db.settings.get('settings'), [])
@@ -82,7 +82,17 @@ export default function FoodSearchSheet({ date, meal, onClose }: Props) {
     setSelected(food)
   }
 
-  const list = results ?? recents ?? []
+  // Typing filters the user's own food history immediately (any length),
+  // shown above the web results — previously logged foods beat re-fetching.
+  const q = query.trim().toLowerCase()
+  const historyMatches = q
+    ? (recents ?? []).filter(
+        (f) =>
+          f.name.toLowerCase().includes(q) || (f.brand ?? '').toLowerCase().includes(q),
+      )
+    : (recents ?? [])
+  const historyIds = new Set(historyMatches.map((f) => f.id))
+  const webResults = (results ?? []).filter((f) => !historyIds.has(f.id))
 
   // Portaled to <body> so it always paints above the app shell (iOS
   // composited scrollers can invert in-tree stacking order).
@@ -103,47 +113,26 @@ export default function FoodSearchSheet({ date, meal, onClose }: Props) {
         </div>
         <div className="muted" style={{ margin: '8px 2px' }}>
           {searching
-            ? 'Searching Open Food Facts…'
-            : (searchError ?? (results ? `${results.length} results` : 'Recent foods'))}
+            ? 'Searching the databases…'
+            : (searchError ??
+              (q ? `${historyMatches.length + webResults.length} matches` : 'Your food history'))}
           {` · adding to ${meal}`}
         </div>
 
         <div className="search-results">
-          {list.map((f) => (
-            <button key={f.id} className="result-item" onClick={() => pick(f)}>
-              {f.imageUrl ? (
-                <img src={f.imageUrl} alt="" />
-              ) : (
-                <div
-                  style={{
-                    width: 40,
-                    height: 40,
-                    borderRadius: 8,
-                    background: 'var(--surface-2)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    color: 'var(--text-muted)',
-                    flex: '0 0 40px',
-                  }}
-                >
-                  🍽
-                </div>
-              )}
-              <div className="info" style={{ flex: 1, minWidth: 0 }}>
-                <div className="name" style={{ fontSize: '0.9rem' }}>
-                  {f.name}
-                </div>
-                <div className="detail muted" style={{ fontSize: '0.75rem' }}>
-                  {f.brand ? `${f.brand} · ` : ''}
-                  {unit === 'imperial'
-                    ? `${Math.round((f.per100.kcal * GRAMS_PER_OZ) / 100)} kcal / oz`
-                    : `${f.per100.kcal} kcal / 100 g`}
-                </div>
-              </div>
-            </button>
+          {q && historyMatches.length > 0 && (
+            <div className="result-section-label">From your history</div>
+          )}
+          {historyMatches.map((f) => (
+            <ResultRow key={f.id} food={f} unit={unit} onPick={pick} />
           ))}
-          {list.length === 0 && !searching && (
+          {q && webResults.length > 0 && (
+            <div className="result-section-label">From the databases</div>
+          )}
+          {webResults.map((f) => (
+            <ResultRow key={f.id} food={f} unit={unit} onPick={pick} />
+          ))}
+          {historyMatches.length === 0 && webResults.length === 0 && !searching && (
             <div className="muted" style={{ padding: '16px 2px' }}>
               {results
                 ? 'Nothing found. It escaped… this time.'
@@ -185,6 +174,51 @@ export default function FoodSearchSheet({ date, meal, onClose }: Props) {
       )}
     </>,
     document.body,
+  )
+}
+
+function ResultRow({
+  food: f,
+  unit,
+  onPick,
+}: {
+  food: Food
+  unit: Settings['unit']
+  onPick: (f: Food) => void
+}) {
+  return (
+    <button className="result-item" onClick={() => onPick(f)}>
+      {f.imageUrl ? (
+        <img src={f.imageUrl} alt="" />
+      ) : (
+        <div
+          style={{
+            width: 40,
+            height: 40,
+            borderRadius: 8,
+            background: 'var(--surface-2)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            color: 'var(--text-muted)',
+            flex: '0 0 40px',
+          }}
+        >
+          🍽
+        </div>
+      )}
+      <div className="info" style={{ flex: 1, minWidth: 0 }}>
+        <div className="name" style={{ fontSize: '0.9rem' }}>
+          {f.name}
+        </div>
+        <div className="detail muted" style={{ fontSize: '0.75rem' }}>
+          {f.brand ? `${f.brand} · ` : ''}
+          {unit === 'imperial'
+            ? `${Math.round((f.per100.kcal * GRAMS_PER_OZ) / 100)} kcal / oz`
+            : `${f.per100.kcal} kcal / 100 g`}
+        </div>
+      </div>
+    </button>
   )
 }
 
