@@ -807,6 +807,17 @@ label.field {
   display: none;
 }
 
+.result-section-label {
+  font-size: 0.7rem;
+  font-weight: 900;
+  font-style: italic;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--hype-2);
+  margin: 12px 2px 2px;
+  text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.8);
+}
+
 /* ---------- Sheet (modal) ---------- */
 .sheet-backdrop {
   position: fixed;
