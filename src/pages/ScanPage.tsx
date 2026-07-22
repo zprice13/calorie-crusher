@@ -1,7 +1,8 @@
 import { useCallback, useRef, useState } from 'react'
 import { useBarcodeScanner } from '../scanner/useBarcodeScanner'
 import { lookupBarcode, ProductNotFoundError } from '../api/openFoodFacts'
-import { db } from '../db'
+import { lookupBarcodeUsda } from '../api/usda'
+import { db, getSettings } from '../db'
 import type { Food } from '../types'
 import FoodDetailSheet from '../components/FoodDetailSheet'
 
@@ -30,16 +31,32 @@ export default function ScanPage({ onLogged }: { onLogged: () => void }) {
     if (navigator.vibrate) navigator.vibrate(60)
     setLookup({ phase: 'looking', barcode })
     try {
-      // Serve from the local cache first so re-scans work offline.
-      const cached = await db.foods.get(barcode)
-      const food = cached ?? (await lookupBarcode(barcode))
+      // Lookup chain: local cache (incl. user corrections) → Open Food
+      // Facts → USDA FoodData Central branded foods.
+      let food: Food | undefined = await db.foods.get(barcode)
+      let networkTrouble = false
+      if (!food) {
+        try {
+          food = await lookupBarcode(barcode)
+        } catch (e) {
+          if (!(e instanceof ProductNotFoundError)) networkTrouble = true
+        }
+      }
+      if (!food) {
+        try {
+          food = await lookupBarcodeUsda(barcode, (await getSettings()).usdaApiKey)
+        } catch (e) {
+          if (e instanceof ProductNotFoundError && !networkTrouble) {
+            setLookup({ phase: 'not-found', barcode })
+            return
+          }
+          setLookup({ phase: 'lookup-error', barcode })
+          return
+        }
+      }
       setLookup({ phase: 'found', food })
-    } catch (e) {
-      setLookup(
-        e instanceof ProductNotFoundError
-          ? { phase: 'not-found', barcode }
-          : { phase: 'lookup-error', barcode },
-      )
+    } catch {
+      setLookup({ phase: 'lookup-error', barcode })
     } finally {
       busyRef.current = false
     }
@@ -112,8 +129,8 @@ export default function ScanPage({ onLogged }: { onLogged: () => void }) {
         {lookup.phase === 'looking' && `Specimen ${lookup.barcode} acquired. Analyzing…`}
         {lookup.phase === 'not-found' && (
           <span>
-            Specimen <strong>{lookup.barcode}</strong> is unknown to Open Food Facts. It
-            escaped… this time.{' '}
+            Specimen <strong>{lookup.barcode}</strong> is unknown to Open Food Facts and
+            USDA alike. It escaped… this time.{' '}
             <button className="danger-ghost" style={{ color: 'var(--hype-2)', padding: 0 }} onClick={reset}>
               Hunt again
             </button>
@@ -157,7 +174,11 @@ export default function ScanPage({ onLogged }: { onLogged: () => void }) {
         <a href="https://world.openfoodfacts.org" target="_blank" rel="noreferrer" style={{ color: 'var(--hype-2)' }}>
           Open Food Facts
         </a>{' '}
-        database. Captured specimens are cached on-device for offline re-hunting.
+        database, with{' '}
+        <a href="https://fdc.nal.usda.gov" target="_blank" rel="noreferrer" style={{ color: 'var(--hype-2)' }}>
+          USDA FoodData Central
+        </a>{' '}
+        as backup. Captured specimens are cached on-device for offline re-hunting.
       </p>
 
       {lookup.phase === 'found' && (

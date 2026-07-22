@@ -325,6 +325,28 @@ export default function SettingsPage() {
         </p>
       </div>
 
+      <h2>Data sources</h2>
+      <div className="card">
+        <label className="field" htmlFor="usda-key">
+          USDA API key (optional)
+        </label>
+        <input
+          id="usda-key"
+          type="text"
+          autoCapitalize="off"
+          autoCorrect="off"
+          spellCheck={false}
+          placeholder="Uses the shared demo key if blank"
+          value={form.usdaApiKey ?? ''}
+          onChange={(e) => patch({ usdaApiKey: e.target.value.trim() || undefined })}
+        />
+        <p className="muted" style={{ marginBottom: 0, marginTop: 8, fontSize: '0.75rem' }}>
+          When a barcode isn't in Open Food Facts, the scanner falls back to USDA
+          FoodData Central. The shared demo key allows ~30 lookups/hour; a personal
+          key is free and instant at api.data.gov/signup.
+        </p>
+      </div>
+
       <button
         className="primary"
         style={{ width: '100%', marginTop: 16 }}

@@ -23,7 +23,7 @@ export interface Food {
   /** Typical serving size in grams, if known. */
   servingGrams?: number
   servingLabel?: string
-  source: 'openfoodfacts' | 'custom'
+  source: 'openfoodfacts' | 'usda' | 'custom'
   imageUrl?: string
   /** True when the user has corrected the nutrition facts locally. */
   edited?: boolean
@@ -125,6 +125,8 @@ export interface Settings {
   weightGoalKg?: number
   /** Daily water goal in ml. */
   waterGoalMl?: number
+  /** Optional personal USDA FoodData Central API key (falls back to DEMO_KEY). */
+  usdaApiKey?: string
   unit: 'metric' | 'imperial'
   /** Profile for TDEE estimation (optional). */
   sex?: 'male' | 'female'
