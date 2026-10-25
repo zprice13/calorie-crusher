@@ -983,6 +983,15 @@ label.field {
   letter-spacing: 0.04em;
 }
 
+.last-hint {
+  margin-top: 4px;
+  font-size: 0.74rem;
+  font-weight: 800;
+  color: var(--water);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
 .pr-trophy {
   flex: 0 0 auto;
   font-size: 1rem;
