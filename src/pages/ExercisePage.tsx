@@ -22,6 +22,7 @@ import {
   SECONDS_PER_REP,
 } from '../exercises'
 import { useToast } from '../components/Toast'
+import ProgressionSheet from '../components/ProgressionSheet'
 
 const FALLBACK_WEIGHT_KG = 70
 
@@ -90,6 +91,19 @@ export default function ExercisePage() {
   const [liftWeight, setLiftWeight] = useState('')
   const [liftReps, setLiftReps] = useState('8')
   const [liftSets, setLiftSets] = useState('3')
+  const [progressionFor, setProgressionFor] = useState<string | null>(null)
+
+  /** Most recent logged set-group for an exercise — the number to beat. */
+  function lastSession(exercise: string, category: WorkoutLog['category']): WorkoutLog | null {
+    let latest: WorkoutLog | null = null
+    for (const w of allWorkouts ?? []) {
+      if (w.exercise !== exercise || w.category !== category) continue
+      if (!latest || w.createdAt > latest.createdAt) latest = w
+    }
+    return latest
+  }
+
+  const lastLift = lastSession(lift, 'lift')
 
   async function logLift() {
     const weight = parseFloat(liftWeight)
@@ -241,6 +255,18 @@ export default function ExercisePage() {
             {unitLabel})
           </div>
         )}
+        {lastLift && (
+          <div className="last-hint">
+            Last: {lastLift.sets}×{lastLift.reps} @{' '}
+            {Math.round(kgToDisplay(lastLift.weightKg!, unit))} {unitLabel} · {lastLift.date} —
+            beat it.
+          </div>
+        )}
+        {lastLift && (
+          <button className="edit-facts-btn" onClick={() => setProgressionFor(lift)}>
+            📈 View progression
+          </button>
+        )}
         <div className="row">
           <div>
             <label className="field" htmlFor="lift-weight">
@@ -356,6 +382,13 @@ export default function ExercisePage() {
             {calisthenicsPRs.get(caliName) && (
               <div className="pr-hint">Rep PR: {calisthenicsPRs.get(caliName)!.reps} in a set</div>
             )}
+            {lastSession(caliName, 'calisthenics') && (
+              <div className="last-hint">
+                Last: {lastSession(caliName, 'calisthenics')!.sets}×
+                {lastSession(caliName, 'calisthenics')!.reps} ·{' '}
+                {lastSession(caliName, 'calisthenics')!.date} — beat it.
+              </div>
+            )}
             <div className="row">
               <div>
                 <label className="field" htmlFor="cali-sets">
@@ -425,6 +458,13 @@ export default function ExercisePage() {
         </>
       )}
 
+      {progressionFor && (
+        <ProgressionSheet
+          exercise={progressionFor}
+          unit={unit}
+          onClose={() => setProgressionFor(null)}
+        />
+      )}
     </div>
   )
 }
